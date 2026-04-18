@@ -1,0 +1,131 @@
+/* Tablet */
+@media (max-width: 968px) {
+    .app-container {
+        padding: var(--spacing-md);
+    }
+    
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+    }
+    
+    .hero-title {
+        font-size: 1.8rem;
+    }
+    
+    .main-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .features-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Mobile Landscape */
+@media (max-width: 768px) {
+    :root {
+        --spacing-xl: 1.5rem;
+        --spacing-2xl: 2rem;
+    }
+    
+    .hero-title {
+        font-size: 1.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .card-title {
+        font-size: 1.25rem;
+    }
+    
+    .step-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .step-number {
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: var(--spacing-md);
+    }
+}
+
+/* Mobile Portrait */
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 1.25rem;
+    }
+    
+    .card-header {
+        padding: var(--spacing-md);
+    }
+    
+    .form-section {
+        padding: var(--spacing-md);
+    }
+    
+    .dependente-item,
+    .rendimento-item,
+    .maisvalia-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dependente-item input,
+    .rendimento-item input,
+    .maisvalia-item input {
+        width: 100%;
+    }
+    
+    .btn-small {
+        width: 100%;
+    }
+    
+    .toast {
+        left: var(--spacing-md);
+        right: var(--spacing-md);
+        bottom: var(--spacing-md);
+        text-align: center;
+    }
+}
+
+/* Print styles - mantém backgrounds para impressão */
+@media print {
+    .main-header,
+    .main-nav,
+    .action-buttons,
+    .upload-zone,
+    .tabs-container,
+    .btn {
+        display: none;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid var(--border-color);
+    }
+    
+    .form-input {
+        border: none;
+        padding: 0;
+    }
+}

@@ -6,8 +6,14 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=yes"
     />
-    <title>IRS Buddy - Gerador Declaração IRS</title>
-    <link rel="stylesheet" href="./index.css" />
+    <title>IRS Buddy - Gerador de Declaração IRS Portugal</title>
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/forms.css" />
+    <link rel="stylesheet" href="css/tabs.css" />
+    <link rel="stylesheet" href="css/table.css" />
+    <link rel="stylesheet" href="css/modal.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -16,194 +22,7 @@
     />
   </head>
   <body>
-    <div class="app-container">
-      <!-- Header -->
-      <header class="main-header">
-        <div class="logo-container">
-          <div class="logo-icon">🧾</div>
-          <div class="logo-text">
-            <span class="logo-name">IRS Buddy</span>
-            <span class="logo-badge">Beta</span>
-          </div>
-        </div>
-        <nav class="main-nav">
-          <a href="#" class="nav-link active">Início</a>
-          <a href="#" class="nav-link">Como funciona</a>
-          <a href="#" class="nav-link">Ajuda</a>
-        </nav>
-      </header>
-      <!-- Hero Section -->
-      <section class="hero">
-        <h1 class="hero-title">
-          Simplifique a sua <span class="highlight">Declaração de IRS</span>
-        </h1>
-        <p class="hero-subtitle">
-          Carregue o ficheiro XML da AT e obtenha uma análise detalhada,
-          validações e assistência personalizada para a sua declaração de IRS em
-          Portugal.
-        </p>
-      </section>
-
-      <!-- Main Content Grid -->
-      <div class="content-grid">
-        <!-- Left Column: Upload Area -->
-        <div class="card upload-card">
-          <div class="card-header">
-            <div class="card-icon">📁</div>
-            <h2 class="card-title">Upload do Ficheiro XML</h2>
-            <p class="card-description">
-              Utilize o ficheiro XML gerado pela aplicação da Autoridade
-              Tributária (AT)
-            </p>
-          </div>
-
-          <div class="upload-zone" id="uploadZone">
-            <input
-              type="file"
-              id="fileInput"
-              accept=".xml"
-              class="file-input-hidden"
-            />
-            <div class="upload-content">
-              <div class="upload-icon">📄</div>
-              <h3 class="upload-title">Arraste ou clique para selecionar</h3>
-              <p class="upload-info">
-                Suporte apenas para ficheiros XML (.xml)
-              </p>
-              <button class="btn btn-primary" id="uploadButton">
-                <span class="btn-text">Selecionar ficheiro</span>
-              </button>
-            </div>
-            <div class="file-preview" id="filePreview" style="display: none">
-              <div class="file-info">
-                <span class="file-name" id="fileName"></span>
-                <span class="file-size" id="fileSize"></span>
-              </div>
-              <button
-                class="btn-icon"
-                id="clearFileBtn"
-                title="Remover ficheiro"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-
-          <div class="info-box">
-            <div class="info-icon">ℹ️</div>
-            <div class="info-text">
-              <strong>Como obter o XML da sua declaração:</strong><br />
-              1. Aceda ao Portal das Finanças<br />
-              2. Preencha a sua declaração de IRS no simulador/entregar
-              declaração<br />
-              3. Antes de submeter, utilize a opção "Gravar ficheiro XML" ou
-              "Exportar XML"<br />
-              4. Guarde o ficheiro no seu computador e faça upload aqui
-            </div>
-          </div>
-        </div>
-
-        <!-- Right Column: How it Works -->
-        <div class="card instructions-card">
-          <div class="card-header">
-            <div class="card-icon">🚀</div>
-            <h2 class="card-title">Como o IRS Buddy funciona</h2>
-            <p class="card-description">
-              Três passos simples para otimizar a sua declaração
-            </p>
-          </div>
-
-          <div class="steps-container">
-            <div class="step-item">
-              <div class="step-number">1</div>
-              <div class="step-content">
-                <h3 class="step-title">Preencha na AT</h3>
-                <p class="step-description">
-                  Aceda ao Portal das Finanças e preencha a sua declaração de
-                  IRS normalmente no simulador ou na entrega de declaração.
-                </p>
-              </div>
-            </div>
-
-            <div class="step-item">
-              <div class="step-number">2</div>
-              <div class="step-content">
-                <h3 class="step-title">Grave como XML</h3>
-                <p class="step-description">
-                  Utilize a funcionalidade da aplicação da AT para
-                  gravar/exportar a sua declaração em formato XML. Guarde o
-                  ficheiro no seu computador.
-                </p>
-              </div>
-            </div>
-
-            <div class="step-item">
-              <div class="step-number">3</div>
-              <div class="step-content">
-                <h3 class="step-title">Upload e Análise</h3>
-                <p class="step-description">
-                  Carregue o ficheiro XML aqui. O IRS Buddy irá analisar os
-                  dados, validar campos e sugerir melhorias para maximizar o seu
-                  reembolso.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="features-list">
-            <div class="feature">
-              <span class="feature-icon">✅</span>
-              <span>Validação automática de anexos</span>
-            </div>
-            <div class="feature">
-              <span class="feature-icon">✅</span>
-              <span>Simulação de reembolso/valor a pagar</span>
-            </div>
-            <div class="feature">
-              <span class="feature-icon">✅</span>
-              <span>Deduções fiscais identificadas</span>
-            </div>
-            <div class="feature">
-              <span class="feature-icon">✅</span>
-              <span>Relatório detalhado para otimização</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Result Section (hidden initially) -->
-      <div id="resultSection" class="result-section" style="display: none">
-        <div class="card result-card">
-          <div class="card-header">
-            <div class="card-icon">📊</div>
-            <h2 class="card-title">Análise da Declaração</h2>
-            <p class="card-description" id="resultSummary">
-              Resultados processados com sucesso
-            </p>
-          </div>
-          <div class="result-content" id="resultContent">
-            <!-- Dynamic content will be inserted here -->
-          </div>
-          <div class="result-actions">
-            <button class="btn btn-secondary" id="newAnalysisBtn">
-              Nova análise
-            </button>
-            <button class="btn btn-primary" id="downloadReportBtn">
-              Descarregar relatório
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <footer class="main-footer">
-        <p class="footer-note">
-          Nota: Esta ferramenta não substitui o aconselhamento profissional.
-          Sempre valide com um Contabilista Certificado.
-        </p>
-      </footer>
-    </div>
-
-    <script src="index.js"></script>
+    <div id="app"></div>
+    <script src="app.js" type="module"></script>
   </body>
 </html>
