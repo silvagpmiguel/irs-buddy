@@ -1,0 +1,33 @@
+{
+    "name": "@irs-buddy/webapp",
+    "version": "1.0.0",
+    "exports": {},
+    "tasks": {
+        "dev": "deno run -A --watch main.ts '--port=${PORT:-4200}'",
+        "build": "deno bundle --platform browser --minify --outdir dist src/index.css && deno bundle --platform browser --minify --outdir dist src/index.html",
+        "cache": "deno cache --reload main.ts",
+        "outdated": "deno outdated --update"
+    },
+    "imports": {
+        "@std/http-file-server": "jsr:@std/http/file-server"
+    },
+    "fmt": {
+        "include": [
+            "src/",
+            "main.ts"
+        ],
+        "exclude": [
+            "dist/"
+        ],
+        "singleQuote": true
+    },
+    "lint": {
+        "include": [
+            "src/",
+            "main.ts"
+        ],
+        "exclude": [
+            "dist/"
+        ]
+    }
+}
