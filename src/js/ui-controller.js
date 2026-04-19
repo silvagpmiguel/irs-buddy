@@ -7,11 +7,16 @@ export class UIController {
     this.declaracaoView = null;
     this.tabsContainer = null;
     this.tabContent = null;
+    this.formRenderer = null;
   }
 
   init() {
     this.initializeViews();
     this.setupNavigation();
+  }
+
+  setFormRenderer(renderer) {
+    this.formRenderer = renderer;
   }
 
   initializeViews() {
@@ -37,7 +42,7 @@ export class UIController {
 
                     <section class="hero">
                         <h1 class="hero-title">Simplifique os seus <span class="highlight">Anexos IRS</span></h1>
-                        <p class="hero-subtitle">Carregue o ficheiro XML da AT e edite os anexos G, H, I e J com facilidade</p>
+                        <p class="hero-subtitle">Carregue o ficheiro XML da AT e edite os anexos G, H e J com facilidade</p>
                     </section>
 
                     <div class="content-grid">
@@ -71,7 +76,6 @@ export class UIController {
                                     <strong>Anexos suportados:</strong><br>
                                     📈 Anexo G - Mais-Valias e Rendimentos de Capitais<br>
                                     🏥 Anexo H - Deduções à Coleta<br>
-                                    💼 Anexo I - Fundos de Investimento<br>
                                     🌍 Anexo J - Rendimentos Estrangeiros
                                 </div>
                             </div>
@@ -102,7 +106,7 @@ export class UIController {
                                     <div class="step-number">3</div>
                                     <div class="step-content">
                                         <h3>Edite os Anexos</h3>
-                                        <p>Modifique os anexos G, H, I e J</p>
+                                        <p>Modifique os anexos G, H e J</p>
                                     </div>
                                 </div>
                                 <div class="step-item">
@@ -198,13 +202,11 @@ export class UIController {
 
   renderTabs() {
     if (!this.tabsContainer) return;
-
     this.tabsContainer.innerHTML = `
-            <button class="tab-btn active" data-tab="anexoG">📈 Anexo G</button>
-            <button class="tab-btn" data-tab="anexoH">🏥 Anexo H</button>
-            <button class="tab-btn" data-tab="anexoJ">🌍 Anexo J</button>
-        `;
-
+    <button class="tab-btn active" data-tab="anexoG">📈 Anexo G</button>
+    <button class="tab-btn" data-tab="anexoJ">🌍 Anexo J</button>
+    <button class="tab-btn" data-tab="anexoH">🏥 Anexo H</button>
+  `;
     this.setupTabListeners();
   }
 
@@ -236,6 +238,12 @@ export class UIController {
     }
 
     this.currentTab = tabId;
+    if (
+      this.formRenderer &&
+      typeof this.formRenderer.activateTab === "function"
+    ) {
+      this.formRenderer.activateTab(tabId);
+    }
   }
 
   showModal(modalId, content) {
@@ -292,7 +300,6 @@ export class UIController {
   showError(message) {
     this.showToast(message, "error");
   }
-
   showToast(message, type) {
     const existingToast = document.querySelector(".toast");
     if (existingToast) existingToast.remove();
@@ -300,24 +307,11 @@ export class UIController {
     const toast = document.createElement("div");
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
-    toast.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 12px 24px;
-            background: ${type === "success" ? "#0f3b2c" : "#dc3545"};
-            color: white;
-            border-radius: 8px;
-            z-index: 1000;
-            animation: slideIn 0.3s ease;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        `;
+    // Remove estilos inline – agora usa apenas CSS
     document.body.appendChild(toast);
 
     setTimeout(() => {
-      toast.style.animation = "slideOut 0.3s ease";
+      toast.style.animation = "slideOutRight 0.3s ease";
       setTimeout(() => toast.remove(), 300);
     }, 3000);
   }

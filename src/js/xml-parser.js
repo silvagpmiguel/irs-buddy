@@ -1,4 +1,4 @@
-// xml-parser.js - Parse do XML da AT (apenas Anexos G, H, I, J)
+// src/js/xml-parser.js - Parse do XML da AT
 
 export class XMLParser {
   constructor(xmlString) {
@@ -22,6 +22,7 @@ export class XMLParser {
         throw new Error("XML mal formatado: " + parserError.textContent);
       }
 
+      this.parseNif();
       this.parseAnexoG();
       this.parseAnexoH();
       this.parseAnexoJ();
@@ -31,7 +32,7 @@ export class XMLParser {
         data: this.parsedData,
       };
     } catch (error) {
-      console.error("Erro ao parsear XML:", error);
+      console.error("Erro ao fazer parse do XML:", error);
       return {
         success: false,
         error: error.message,
@@ -76,7 +77,9 @@ export class XMLParser {
           const child = children[j];
           const tagName = child.localName || child.tagName;
           const value = child.textContent ? child.textContent.trim() : null;
-          if (value) data[tagName] = value;
+          if (value !== null && value !== "") {
+            data[tagName] = value;
+          }
         }
         rows.push(data);
       }
@@ -91,32 +94,17 @@ export class XMLParser {
     if (anexoG.length === 0) {
       anexoG = this.xmlDoc.getElementsByTagName("AnexoG");
     }
-
     if (anexoG.length === 0) {
-      this.parsedData.anexoG = { presente: false };
+      this.parsedData.anexoG = { presente: false, incluir: true };
       return;
     }
-
     const anexo = anexoG[0];
-
     this.parsedData.anexoG = {
       presente: true,
+      incluir: true,
       ano: this.getElementValue(anexo, "AnexoGq02C01"),
-      alienacaoImoveis: this.getTableRows(
-        anexo,
-        "AnexoGq04T01",
-        "AnexoGq04T01-Linha",
-      ),
-      rendimentosCapitais: this.getTableRows(
-        anexo,
-        "AnexoGq10T01",
-        "AnexoGq10T01-Linha",
-      ),
-      alienacaoParticipacoes: this.getTableRows(
-        anexo,
-        "AnexoGq12BT01",
-        "AnexoGq12BT01-Linha",
-      ),
+      nif: this.getElementValue(anexo, "AnexoGq03C01") ?? this.nif,
+      quadro09: this.getTableRows(anexo, "AnexoGq09T01", "AnexoGq09T01-Linha"),
     };
   }
 
@@ -128,15 +116,22 @@ export class XMLParser {
     }
 
     if (anexoH.length === 0) {
-      this.parsedData.anexoH = { presente: false };
+      this.parsedData.anexoH = { presente: false, incluir: true };
       return;
     }
 
     const anexo = anexoH[0];
 
+    // Obter declaração alternativa (C1)
+    let declaracaoAlternativa = this.getElementValue(anexo, "AnexoHq06B01");
+    if (!declaracaoAlternativa) {
+      declaracaoAlternativa = "N";
+    }
+
     this.parsedData.anexoH = {
       presente: true,
-      nif: this.getElementValue(anexo, "AnexoHq03C01"),
+      incluir: true,
+      nif: this.getElementValue(anexo, "AnexoHq03C01") ?? this.nif,
       ano: this.getElementValue(anexo, "AnexoHq02C01"),
       pensoes: this.getTableRows(anexo, "AnexoHq04T01", "AnexoHq04T01-Linha"),
       beneficiosFiscais: this.getTableRows(
@@ -144,6 +139,7 @@ export class XMLParser {
         "AnexoHq06BT01",
         "AnexoHq06BT01-Linha",
       ),
+      declaracaoAlternativa: declaracaoAlternativa,
       deducoes: {
         saude: this.getElementValue(anexo, "AnexoHq08C801a"),
         educacao: this.getElementValue(anexo, "AnexoHq08C802a"),
@@ -161,35 +157,91 @@ export class XMLParser {
     }
 
     if (anexoJ.length === 0) {
-      this.parsedData.anexoJ = { presente: false };
+      this.parsedData.anexoJ = { presente: false, incluir: true };
       return;
     }
 
     const anexo = anexoJ[0];
 
+    // Extrair IBAN (Quadro 11)
+    let iban = null;
+    const ibanTable = anexo.getElementsByTagNameNS(
+      this.namespace,
+      "AnexoJq11T01",
+    );
+    const altIbanTable = anexo.getElementsByTagName("AnexoJq11T01");
+    const tableToUse = ibanTable.length > 0 ? ibanTable : altIbanTable;
+
+    if (tableToUse.length > 0) {
+      const ibanLinha = tableToUse[0].getElementsByTagNameNS(
+        this.namespace,
+        "AnexoJq11T01-Linha",
+      );
+      const altIbanLinha =
+        tableToUse[0].getElementsByTagName("AnexoJq11T01-Linha");
+      const linha =
+        ibanLinha.length > 0
+          ? ibanLinha[0]
+          : altIbanLinha.length > 0
+            ? altIbanLinha[0]
+            : null;
+
+      if (linha) {
+        const ibanValue = this.getElementValue(linha, "Iban");
+        const bicValue = this.getElementValue(linha, "Bic");
+        if (ibanValue) {
+          iban = { Iban: ibanValue, Bic: bicValue || "" };
+        }
+      }
+    }
+    // Obter opção de englobamento da secção 8
+    let englobamentoSec8 = this.getElementValue(anexo, "AnexoJq08B01");
+    if (!englobamentoSec8) {
+      englobamentoSec8 = "N";
+    }
+
+    // Obter opção de englobamento da secção 9.2
+    let englobamentoSec92 = this.getElementValue(anexo, "AnexoJq092B01");
+    if (!englobamentoSec92) {
+      englobamentoSec92 = "N";
+    }
+
     this.parsedData.anexoJ = {
       presente: true,
+      incluir: true,
       ano: this.getElementValue(anexo, "AnexoJq02C01"),
-      rendimentosCategoriaA: this.getTableRows(
-        anexo,
-        "AnexoJq04AT01",
-        "AnexoJq04AT01-Linha",
-      ),
-      rendimentosCategoriaB: this.getTableRows(
-        anexo,
-        "AnexoJq05AT01",
-        "AnexoJq05AT01-Linha",
-      ),
       rendimentosCategoriaE: this.getTableRows(
         anexo,
-        "AnexoJq06AT01",
-        "AnexoJq06AT01-Linha",
+        "AnexoJq08AT01",
+        "AnexoJq08AT01-Linha",
       ),
       rendimentosCategoriaG: this.getTableRows(
         anexo,
-        "AnexoJq09AT01",
-        "AnexoJq09AT01-Linha",
+        "AnexoJq092AT01",
+        "AnexoJq092AT01-Linha",
       ),
+      iban: iban,
+      englobamentoSec8: englobamentoSec8, // Novo campo
+      englobamento: englobamentoSec92, // Renomeado para clareza
     };
+  }
+
+  parseNif() {
+    let rosto = this.xmlDoc.getElementsByTagNameNS(this.namespace, "Rosto");
+    if (rosto.length === 0) rosto = this.xmlDoc.getElementsByTagName("Rosto");
+    if (rosto.length === 0) return "";
+    const quadro03 = rosto[0].getElementsByTagNameNS(
+      this.namespace,
+      "Quadro03",
+    );
+    const altQuadro03 = rosto[0].getElementsByTagName("Quadro03");
+    const q03 = quadro03.length > 0 ? quadro03[0] : altQuadro03[0];
+    if (!q03) return "";
+    const q03c01 = q03.getElementsByTagNameNS(this.namespace, "Q03C01");
+    const altQ03c01 = q03.getElementsByTagName("Q03C01");
+    const nifElement = q03c01.length > 0 ? q03c01[0] : altQ03c01[0];
+    if (nifElement && nifElement.textContent) {
+      this.parsedData.nif = nifElement.textContent.trim();
+    }
   }
 }

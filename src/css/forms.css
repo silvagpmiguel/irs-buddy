@@ -96,6 +96,41 @@
     cursor: not-allowed;
 }
 
+/* Form Container com scroll */
+.form-container {
+    max-height: 70vh;
+    overflow-x: auto;
+    overflow-y: auto;
+    padding: var(--spacing-sm);
+}
+
+/* Scrollbar personalizada */
+.form-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.form-container::-webkit-scrollbar-track {
+    background: var(--bg-light);
+    border-radius: 4px;
+}
+
+.form-container::-webkit-scrollbar-thumb {
+    background: var(--primary-light);
+    border-radius: 4px;
+}
+
+.form-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* Table Container */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: var(--spacing-md);
+}
+
 /* Question Box */
 .question-box {
     background: var(--bg-light);
@@ -215,15 +250,7 @@
     cursor: not-allowed;
 }
 
-.disabled-section-content .at-table-input,
-.disabled-section-content .at-table-select,
-.disabled-section-content .btn-remove-row,
-.disabled-section-content .btn-add-row {
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-/* Itens Dinâmicos */
+/* Itens Dinâmicos (legado - manter para compatibilidade) */
 .dependente-item,
 .rendimento-item,
 .maisvalia-item,
@@ -262,13 +289,6 @@
     font-size: 0.85rem;
 }
 
-.dependente-item input:focus,
-.rendimento-item input:focus,
-.maisvalia-item input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-}
-
 .btn-small {
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
@@ -282,27 +302,6 @@
     font-style: italic;
     background: var(--bg-light);
     border-radius: var(--border-radius-sm);
-}
-
-/* Form Container com scroll */
-.form-container {
-    max-height: 70vh;
-    overflow-y: auto;
-    padding: var(--spacing-sm);
-}
-
-.form-container::-webkit-scrollbar {
-    width: 8px;
-}
-
-.form-container::-webkit-scrollbar-track {
-    background: var(--bg-light);
-    border-radius: 4px;
-}
-
-.form-container::-webkit-scrollbar-thumb {
-    background: var(--primary-light);
-    border-radius: 4px;
 }
 
 /* Select custom styling */
@@ -320,11 +319,6 @@ select.form-input {
     min-width: 80px;
     text-align: right;
     padding: 0 var(--spacing-sm);
-}
-
-/* Table Container */
-.table-container {
-    margin-top: var(--spacing-md);
 }
 
 /* Resumo Stats */
@@ -389,14 +383,7 @@ select.form-input {
     
     .dependente-item input,
     .rendimento-item input,
-    .maisvalia-item input,
-    .alienacao-item input,
-    .participacao-item input,
-    .beneficio-item input,
-    .contitular-item input,
-    .rendimento-juros-item input,
-    .mais-valia-item input,
-    .iban-item input {
+    .maisvalia-item input {
         width: 100%;
     }
     
@@ -413,5 +400,9 @@ select.form-input {
     .resumo-stats {
         grid-template-columns: 1fr;
         gap: var(--spacing-sm);
+    }
+    
+    .question-box {
+        padding: var(--spacing-md);
     }
 }

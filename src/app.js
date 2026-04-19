@@ -10,13 +10,155 @@ class IRSBuddy {
     this.parsedData = null;
     this.editedData = null;
     this.currentFile = null;
+    this.exporting = false;
   }
 
-  async init() {
+  init() {
     this.ui = new UIController();
-    await this.ui.init();
+    this.ui.init();
     this.setupUploadListeners();
     this.setupActionButtons();
+  }
+
+  exportXML() {
+    if (this.exporting) return; // impede múltiplas exportações
+    if (!this.editedData) {
+      this.ui.showError("Não há dados para exportar.");
+      return;
+    }
+    if (!this.originalXmlString) {
+      this.ui.showError("XML original não encontrado.");
+      return;
+    }
+
+    const includedAnexos = {
+      anexoJ: this.editedData.anexoJ?.incluir !== false,
+      anexoH: this.editedData.anexoH?.incluir !== false,
+      anexoG: this.editedData.anexoG?.incluir !== false,
+    };
+
+    if (
+      !includedAnexos.anexoG &&
+      !includedAnexos.anexoH &&
+      !includedAnexos.anexoJ
+    ) {
+      this.ui.showError("Nenhum anexo selecionado para exportar.");
+      return;
+    }
+
+    // Desabilita o botão e mostra loading
+    const exportBtn = document.getElementById("exportXMLBtn");
+    if (exportBtn) {
+      this.exporting = true;
+      exportBtn.disabled = true;
+      exportBtn.textContent = "⏳ A exportar...";
+    }
+
+    // Pequeno delay para garantir que o botão é desabilitado visualmente
+    setTimeout(() => {
+      try {
+        const tableReferences = {
+          beneficiosTable: this.formRenderer?.tables?.beneficios,
+          rendimentosJurosTable: this.formRenderer?.tables?.rendimentosJuros,
+          maisValiasJTable: this.formRenderer?.tables?.maisValiasJ,
+          maisValiasGTable: this.formRenderer?.tables?.maisValiasG,
+        };
+
+        const exporter = new XMLExporter(
+          this.originalXmlString,
+          this.editedData,
+          includedAnexos,
+          tableReferences,
+        );
+        const result = exporter.export();
+
+        if (result.success) {
+          const blob = new Blob([result.xml], { type: "application/xml" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `declaracao_irs_atualizada_${new Date().toISOString().slice(0, 19)}.xml`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          this.ui.showSuccess(result.message);
+        } else {
+          this.ui.showError("Erro ao exportar: " + result.error);
+        }
+      } catch (error) {
+        this.ui.showError("Erro inesperado: " + error.message);
+      } finally {
+        // Reabilita o botão
+        if (exportBtn) {
+          exportBtn.disabled = false;
+          exportBtn.textContent = "💾 Exportar XML";
+        }
+        this.exporting = false;
+      }
+    }, 100);
+  }
+
+  readXMLFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => this.parseXML(e.target.result);
+    reader.onerror = () => this.ui.showError("Erro ao ler o ficheiro.");
+    reader.readAsText(file, "UTF-8");
+  }
+
+  renderDeclaracaoView() {
+    this.formRenderer = new FormRenderer(this.editedData, (newData) => {
+      this.editedData = newData;
+    });
+    this.ui.setFormRenderer(this.formRenderer);
+    this.ui.renderTabs();
+
+    const tabContent = document.getElementById("tabContent");
+    if (!tabContent) return;
+
+    tabContent.innerHTML = `
+        <div id="anexoGTab" class="tab-content active">
+            <div class="card">
+                ${this.formRenderer.renderAnexoGForm()}
+            </div>
+        </div>
+        <div id="anexoJTab" class="tab-content" style="display: none;">
+            <div class="card">
+                ${this.formRenderer.renderAnexoJForm()}
+            </div>
+        </div>
+        <div id="anexoHTab" class="tab-content" style="display: none;">
+            <div class="card">
+                ${this.formRenderer.renderAnexoHForm()}
+            </div>
+        </div>
+    `;
+
+    this.ui.tabs = {
+      anexoG: document.getElementById("anexoGTab"),
+      anexoH: document.getElementById("anexoHTab"),
+      anexoJ: document.getElementById("anexoJTab"),
+    };
+
+    this.formRenderer.bindEvents(tabContent);
+    this.formRenderer.activateTab("anexoG");
+    this.setupActionButtons();
+  }
+
+  parseXML(xmlString) {
+    this.originalXmlString = xmlString;
+    const parser = new XMLParser(xmlString);
+    const result = parser.parse();
+
+    if (result.success) {
+      this.parsedData = result.data;
+      this.editedData = JSON.parse(JSON.stringify(result.data));
+      this.renderDeclaracaoView();
+      this.ui.switchView("declaracao");
+      this.ui.showSuccess("XML carregado com sucesso!");
+    } else {
+      this.ui.showError("Erro ao processar XML: " + result.error);
+    }
   }
 
   setupUploadListeners() {
@@ -116,78 +258,6 @@ class IRSBuddy {
     this.currentFile = null;
     this.parsedData = null;
     this.editedData = null;
-  }
-
-  readXMLFile(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => this.parseXML(e.target.result);
-    reader.onerror = () => this.ui.showError("Erro ao ler o ficheiro.");
-    reader.readAsText(file, "UTF-8");
-  }
-
-  parseXML(xmlString) {
-    const parser = new XMLParser(xmlString);
-    const result = parser.parse();
-
-    if (result.success) {
-      this.parsedData = result.data;
-      this.editedData = JSON.parse(JSON.stringify(result.data));
-      this.renderDeclaracaoView();
-      this.ui.switchView("declaracao");
-      this.ui.showSuccess("XML carregado com sucesso!");
-    } else {
-      this.ui.showError("Erro ao processar XML: " + result.error);
-    }
-  }
-
-  renderDeclaracaoView() {
-    this.formRenderer = new FormRenderer(this.editedData, (newData) => {
-      this.editedData = newData;
-    });
-
-    this.ui.renderTabs();
-
-    const tabContent = document.getElementById("tabContent");
-    if (!tabContent) return;
-
-    tabContent.innerHTML = `
-        <div id="anexoGTab" class="tab-content active">
-            <div class="card">
-                ${this.formRenderer.renderAnexoGForm()}
-            </div>
-        </div>
-        <div id="anexoHTab" class="tab-content" style="display: none;">
-            <div class="card">
-                ${this.formRenderer.renderAnexoHForm()}
-            </div>
-        </div>
-        <div id="anexoJTab" class="tab-content" style="display: none;">
-            <div class="card">
-                ${this.formRenderer.renderAnexoJForm()}
-            </div>
-        </div>
-    `;
-
-    this.ui.tabs = {
-      anexoG: document.getElementById("anexoGTab"),
-      anexoH: document.getElementById("anexoHTab"),
-      anexoJ: document.getElementById("anexoJTab"),
-    };
-
-    this.formRenderer.bindEvents(tabContent);
-    this.setupActionButtons();
-  }
-
-  exportXML() {
-    if (!this.editedData) {
-      this.ui.showError("Não há dados para exportar.");
-      return;
-    }
-
-    // TODO: Implement XML generation from editedData
-    this.ui.showSuccess(
-      "Funcionalidade de exportação em desenvolvimento. Em breve poderá exportar o XML atualizado.",
-    );
   }
 }
 

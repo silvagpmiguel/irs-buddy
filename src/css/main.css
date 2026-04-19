@@ -58,9 +58,21 @@ body {
 }
 
 .app-container {
-    max-width: 1400px;
+    max-width: 1600px;
     margin: 0 auto;
     padding: 1rem 2rem;
+}
+
+/* Para a view de declaração, usar toda a largura disponível */
+.declaracao-container {
+    width: 100%;
+    overflow-x: visible;
+}
+
+/* Cards dentro da declaração */
+.declaracao-container .card {
+    width: 100%;
+    overflow: visible;
 }
 
 /* Header */
@@ -510,40 +522,57 @@ body {
 }
 
 /* Toast */
+/* Toast - posição superior direita */
 .toast {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 12px 24px;
-    border-radius: 8px;
-    color: white;
-    font-size: 0.9rem;
-    font-weight: 500;
-    z-index: 1000;
-    animation: slideIn 0.3s ease;
-    box-shadow: var(--shadow-lg);
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  z-index: 1000;
+  animation: slideInRight 0.3s ease;
+  box-shadow: var(--shadow-lg);
 }
 
+/* Sucesso com cor mais suave (verde menos agressivo) */
 .toast-success {
-    background: linear-gradient(135deg, #28a745, #20c997);
+  background: linear-gradient(135deg, #2b8c5e, #1f6e4a);
 }
 
+/* Erro mantém vermelho forte */
 .toast-error {
-    background: linear-gradient(135deg, #dc3545, #c82333);
+  background: linear-gradient(135deg, #dc3545, #b02a37);
 }
 
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+/* Animação de entrada pela direita */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
 }
 
 /* Responsividade */
+@media (min-width: 1600px) {
+    .app-container {
+        padding: 1rem 3rem;
+    }
+}
+
 @media (max-width: 968px) {
     .content-grid {
         grid-template-columns: 1fr;

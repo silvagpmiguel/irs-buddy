@@ -11,85 +11,250 @@ export class FormRenderer {
     this.data = data;
     this.onDataChange = onDataChange;
     this.tables = {};
+    this.initializedTabs = new Set();
   }
 
   // ============ ANEXO G ============
   renderAnexoGForm() {
     const anexoG = this.data.anexoG || {};
     const isIncluded = anexoG.incluir !== false;
+    const englobamento = anexoG.englobamento || "N";
 
     return `
-        <div id="anexoGContent" class="${!isIncluded ? "disabled-section-content" : ""}">
-            <div class="card-header">
-                <div class="card-header-left">
-                    <div class="card-icon">📈</div>
-                    <h2 class="card-title">Anexo G - Mais-Valias e Rendimentos de Capitais</h2>
-                </div>
-                <div class="toggle-container">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="incluirAnexoG" class="toggle-input" ${isIncluded ? "checked" : ""}>
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <span class="toggle-label">Incluir Anexo G</span>
-                </div>
-            </div>
-            
-            <div class="${!isIncluded ? "disabled-section-content" : ""}">
-                <div class="form-section">
-                    <h3>📈 Mais-Valias de Ações / Fundos</h3>
-                    <div id="maisValiasGContainer"></div>
-                </div>
-            </div>
+    <div id="anexoGContent" class="${!isIncluded ? "disabled-section-content" : ""}">
+      <div class="card-header">
+        <div class="card-header-left">
+          <div class="card-icon">📈</div>
+          <h2 class="card-title">Anexo G - Mais-Valias e Rendimentos de Capitais</h2>
         </div>
-    `;
+        <div class="toggle-container">
+          <label class="toggle-switch">
+            <input type="checkbox" id="incluirAnexoG" class="toggle-input" ${isIncluded ? "checked" : ""}>
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">Incluir Anexo G</span>
+        </div>
+      </div>
+      
+      <div class="${!isIncluded ? "disabled-section-content" : ""}">
+        <div class="form-section">
+          <h3>9. Alienação Onerosa de Partes Sociais e Outros Valores Mobiliários [art.º 10.º, n.º 1, al. b), do CIRS]</h3>
+          <div id="anexoGTableContainer"></div>
+        </div>
+
+        <div class="form-section">
+          <h3>15. Opção pelo Englobamento</h3>
+          <div class="question-box">
+            <p class="question-text">Opta pelo englobamento dos rendimentos do Anexo G?</p>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="englobamentoAnexoG" value="S" ${englobamento === "S" ? "checked" : ""} ${!isIncluded ? "disabled" : ""}>
+                <span>Sim</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="englobamentoAnexoG" value="N" ${englobamento === "N" ? "checked" : ""} ${!isIncluded ? "disabled" : ""}>
+                <span>Não</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
   }
 
-  initMaisValiasGTable() {
-    const container = document.getElementById("maisValiasGContainer");
+  initAnexoGTable() {
+    if (this.tables.anexoG) return;
+    const container = document.getElementById("anexoGTableContainer");
     if (!container) return;
-
     const anexoG = this.data.anexoG || {};
-    const maisValias = anexoG.alienacaoParticipacoes || [];
+    const rows = anexoG.quadro09 || [];
+    const nifTitular = anexoG.nif || this.data.nif;
 
-    if (this.tables.maisValiasG) {
-      container.innerHTML = "";
-    }
-
-    this.tables.maisValiasG = new DynamicTable("maisValiasGContainer", {
-      data: maisValias.map((mv, idx) => ({
-        NIFEntidades: mv.NIFEntidades || "",
-        ValorRealizacao: mv.ValorRealizacao || "",
-        ValorAquisicao: mv.ValorAquisicao || "",
+    this.tables.anexoG = new DynamicTable("anexoGTableContainer", {
+      data: rows.map((row) => ({
+        NLinha: row.NLinha || "",
+        Titular: "A",
+        NIF: row.NIF || "",
+        CodEncargos: row.CodEncargos || "",
+        AnoRealizacao: row.AnoRealizacao || "",
+        MesRealizacao: row.MesRealizacao || "",
+        DiaRealizacao: row.DiaRealizacao || "",
+        ValorRealizacao:
+          row.ValorRealizacao !== undefined ? row.ValorRealizacao : 0,
+        AnoAquisicao: row.AnoAquisicao || "",
+        MesAquisicao: row.MesAquisicao || "",
+        DiaAquisicao: row.DiaAquisicao || "",
+        ValorAquisicao:
+          row.ValorAquisicao !== undefined ? row.ValorAquisicao : 0,
+        DespesasEncargos:
+          row.DespesasEncargos !== undefined ? row.DespesasEncargos : 0,
+        PaisContraparte: row.PaisContraparte || "",
+        RespeitaValoresMobiliarios: row.RespeitaValoresMobiliarios || "N",
       })),
       headers: [
         {
-          label: "NIF da Entidade",
-          field: "NIFEntidades",
+          label: "Nº Linha (9001 a ...)",
+          field: "NLinha",
+          type: "auto-number",
+          options: { start: 9001 },
+          class: "col-nlinha",
+        },
+        {
+          label: "Titular",
+          field: "Titular",
+          type: "static-text",
+          class: "col-titular",
+          formatter: () => nifTitular,
+        },
+        {
+          label: "NIF da entidade emitente",
+          field: "NIF",
           type: "text",
           class: "col-nif",
         },
         {
-          label: "Valor de Realização (€)",
-          field: "ValorRealizacao",
+          label: "Código da operação",
+          field: "CodEncargos",
+          type: "select",
+          options: [
+            { value: "G01", label: "G01 - Ações" },
+            { value: "G02", label: "G02 - Outros valores mobiliários" },
+            { value: "G03", label: "G03 - Outras alienações" },
+          ],
+          class: "col-codigo",
+        },
+        {
+          label: "Realização",
+          field: "RealizacaoGroup",
+          class: "col-realizacao",
+          subHeaders: [
+            {
+              label: "Ano",
+              field: "AnoRealizacao",
+              type: "number",
+              options: { min: 1900, max: 2099 },
+              defaultValue: () => new Date().getFullYear(),
+              class: "col-data",
+            },
+            {
+              label: "Mês",
+              field: "MesRealizacao",
+              type: "number",
+              options: { min: 1, max: 12 },
+              defaultValue: () => new Date().getMonth() + 1,
+              class: "col-data",
+            },
+            {
+              label: "Dia",
+              field: "DiaRealizacao",
+              type: "number",
+              options: { min: 1, max: 31 },
+              defaultValue: () => new Date().getDate(),
+              class: "col-data",
+            },
+            {
+              label: "Valor (€)",
+              field: "ValorRealizacao",
+              type: "number",
+              float: true,
+              defaultValue: 0,
+              class: "col-valor",
+            },
+          ],
+        },
+        {
+          label: "Aquisição",
+          field: "AquisicaoGroup",
+          class: "col-aquisicao",
+          subHeaders: [
+            {
+              label: "Ano",
+              field: "AnoAquisicao",
+              type: "number",
+              options: { min: 1900, max: 2099 },
+              defaultValue: () => new Date().getFullYear(),
+              class: "col-data",
+            },
+            {
+              label: "Mês",
+              field: "MesAquisicao",
+              type: "number",
+              options: { min: 1, max: 12 },
+              defaultValue: () => new Date().getMonth() + 1,
+              class: "col-data",
+            },
+            {
+              label: "Dia",
+              field: "DiaAquisicao",
+              type: "number",
+              options: { min: 1, max: 31 },
+              defaultValue: () => new Date().getDate(),
+              class: "col-data",
+            },
+            {
+              label: "Valor (€)",
+              field: "ValorAquisicao",
+              type: "number",
+              float: true,
+              defaultValue: 0,
+              class: "col-valor",
+            },
+          ],
+        },
+        {
+          label: "Despesas e Encargos (€)",
+          field: "DespesasEncargos",
           type: "number",
+          float: true,
+          defaultValue: 0,
           class: "col-valor",
         },
         {
-          label: "Valor de Aquisição (€)",
-          field: "ValorAquisicao",
-          type: "number",
-          class: "col-valor",
+          label: "País da contraparte",
+          field: "PaisContraparte",
+          type: "select",
+          options: CatalogoPaises,
+          class: "col-pais",
         },
         {
-          label: "Mais-Valia (€)",
-          field: "MaisValia",
-          type: "computed",
-          class: "col-valor",
+          label:
+            "Respeita a valores mobiliários admitidos à negociação ou a partes de OIC abertos?",
+          field: "RespeitaValoresMobiliarios",
+          type: "checkbox",
+          selectAll: true,
+          defaultValue: "N",
+          class: "col-booleano",
         },
       ],
+      footerGroups: [
+        {
+          label: "Soma Valor Realização",
+          field: "somaRealizacao",
+          value: (rows) =>
+            rows.reduce((s, r) => s + (parseFloat(r.ValorRealizacao) || 0), 0),
+          formatter: (v) => v.toFixed(2) + " €",
+        },
+        {
+          label: "Soma Valor Aquisição",
+          field: "somaAquisicao",
+          value: (rows) =>
+            rows.reduce((s, r) => s + (parseFloat(r.ValorAquisicao) || 0), 0),
+          formatter: (v) => v.toFixed(2) + " €",
+        },
+        {
+          label: "Soma Despesas e Encargos",
+          field: "somaDespesas",
+          value: (rows) =>
+            rows.reduce((s, r) => s + (parseFloat(r.DespesasEncargos) || 0), 0),
+          formatter: (v) => v.toFixed(2) + " €",
+        },
+      ],
+      paginated: true,
+      pageSize: 10,
       onChange: (newData) => {
         if (!this.data.anexoG) this.data.anexoG = {};
-        this.data.anexoG.alienacaoParticipacoes = newData;
+        this.data.anexoG.quadro09 = newData;
         this.onDataChange(this.data);
       },
     });
@@ -155,7 +320,6 @@ export class FormRenderer {
         </div>
     `;
   }
-
   initBeneficiosTable() {
     const container = document.getElementById("beneficiosTableContainer");
     if (!container) return;
@@ -163,13 +327,13 @@ export class FormRenderer {
     const anexoH = this.data.anexoH || {};
     const beneficios = anexoH.beneficiosFiscais || [];
     const isIncluded = anexoH.incluir !== false;
+    const nifTitular = anexoH.nif || this.data.nif;
 
     if (this.tables.beneficios) {
       container.innerHTML = "";
     }
 
-    const nifTitular = anexoH.nif || "";
-
+    // Criar tabela - skeleton aparece automaticamente
     this.tables.beneficios = new DynamicTable("beneficiosTableContainer", {
       data: beneficios.map((b) => ({
         CodBeneficio: b.CodBeneficio || "",
@@ -185,21 +349,22 @@ export class FormRenderer {
           field: "CodBeneficio",
           type: "select",
           class: "col-codigo",
+          options: CatalogoBeneficios,
         },
         {
           label: "Titular",
           field: "Titular",
           type: "static-text",
           class: "col-titular",
-          formatter: (value, rowIdx, rowData) => {
-            return `A - ${nifTitular}`;
-          },
+          formatter: () => nifTitular,
         },
         {
           label: "Importância Aplicada",
           field: "ImportanciaAplicada",
           type: "number",
           class: "col-valor",
+          float: true,
+          defaultValue: 0,
         },
         {
           label: "Entidade Gestora / Donatária",
@@ -217,6 +382,7 @@ export class FormRenderer {
               field: "Pais",
               type: "select",
               class: "col-pais",
+              options: CatalogoPaises,
             },
             {
               label: "Número Fiscal (UE ou EEE)",
@@ -227,39 +393,26 @@ export class FormRenderer {
           ],
         },
       ],
-      catalogs: {
-        CodBeneficio: CatalogoBeneficios,
-        Pais: CatalogoPaises,
-      },
       footerGroups: [
         {
           label: "Soma de Controlo",
+          field: "somaImportancia",
           value: (rows) => {
             const soma = rows.reduce((acc, row) => {
               return acc + (parseFloat(row.ImportanciaAplicada) || 0);
             }, 0);
-            return soma.toFixed(2) + " €";
+            return soma;
           },
+          formatter: (value) => value.toFixed(2) + " €",
         },
       ],
       onChange: (newData) => {
         if (!this.data.anexoH) this.data.anexoH = {};
-
-        const cleanData = newData.map((row) => ({
-          CodBeneficio: row.CodBeneficio,
-          Titular: row.Titular,
-          ImportanciaAplicada: row.ImportanciaAplicada,
-          NifPortugues: row.NifPortugues,
-          Pais: row.Pais,
-          NumeroFiscalUE: row.NumeroFiscalUE,
-        }));
-
-        this.data.anexoH.beneficiosFiscais = cleanData;
+        this.data.anexoH.beneficiosFiscais = newData;
         this.onDataChange(this.data);
       },
     });
 
-    // Aplicar estado inicial do toggle
     if (!isIncluded) {
       this.tables.beneficios.setEnabled(false);
     }
@@ -269,6 +422,8 @@ export class FormRenderer {
   renderAnexoJForm() {
     const anexoJ = this.data.anexoJ || {};
     const isIncluded = anexoJ.incluir !== false;
+    const englobamentoSec8 = anexoJ.englobamentoSec8 || "N";
+    const englobamentoSec92 = anexoJ.englobamento || "N";
 
     return `
         <div id="anexoJContent" class="${!isIncluded ? "disabled-section-content" : ""}">
@@ -294,34 +449,49 @@ export class FormRenderer {
                         <h4>A - Rendimentos de Juros</h4>
                         <div id="rendimentosJurosContainer"></div>
                     </div>
+                    
+                    <!-- Novo: Subsecção B - Opção de Englobamento -->
+                    <div class="sub-section">
+                        <h4>B - Opção de Englobamento</h4>
+                        <div class="question-box">
+                            <p class="question-text">Opta pelo englobamento destes rendimentos?</p>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="englobamentoSec8" value="S" ${englobamentoSec8 === "S" ? "checked" : ""} ${!isIncluded ? "disabled" : ""}>
+                                    <span>Sim</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="englobamentoSec8" value="N" ${englobamentoSec8 === "N" ? "checked" : ""} ${!isIncluded ? "disabled" : ""}>
+                                    <span>Não</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Secção 9. Rendimentos de Incrementos Patrimoniais (Categoria G) -->
                 <div class="form-section">
                     <h3>9. Rendimentos de Incrementos Patrimoniais (Categoria G)</h3>
                     
-                    <!-- Subsecção 9.2 Incrementos Patrimoniais de Opção de Englobamento -->
                     <div class="sub-section">
                         <h4>9.2 Incrementos Patrimoniais de Opção de Englobamento</h4>
                         
-                        <!-- Subsecção A. Alienação Onerosa de Partes Sociais e Outros Valores Mobiliários -->
                         <div class="sub-section">
-                            <h5>A. Alienação Onerosa de Partes Sociais e Outros Valores Mobiliários [art.º 10.º, n.º 1, al. b), do CIRS]</h5>
+                            <h5>A. Alienação Onerosa de Partes Sociais e Outros Valores Mobiliários</h5>
                             <div id="maisValiasJContainer"></div>
                         </div>
                         
-                        <!-- Subsecção C. Opção de Englobamento -->
                         <div class="sub-section">
                             <h5>C. Opção de Englobamento</h5>
                             <div class="question-box">
                                 <p class="question-text">1 - Opta pelo englobamento dos rendimentos do quadro 9.2?</p>
                                 <div class="radio-group">
                                     <label class="radio-label">
-                                        <input type="radio" name="englobamento" value="S" ${anexoJ.englobamento === "S" ? "checked" : ""} ${!isIncluded ? "disabled" : ""}>
+                                        <input type="radio" name="englobamento" value="S" ${englobamentoSec92 === "S" ? "checked" : ""} ${!isIncluded ? "disabled" : ""}>
                                         <span>Sim</span>
                                     </label>
                                     <label class="radio-label">
-                                        <input type="radio" name="englobamento" value="N" ${anexoJ.englobamento === "N" ? "checked" : ""} ${!isIncluded ? "disabled" : ""}>
+                                        <input type="radio" name="englobamento" value="N" ${englobamentoSec92 === "N" ? "checked" : ""} ${!isIncluded ? "disabled" : ""}>
                                         <span>Não</span>
                                     </label>
                                 </div>
@@ -341,24 +511,12 @@ export class FormRenderer {
   }
 
   initRendimentosJurosTable() {
+    if (this.tables.rendimentosJuros) return;
     const container = document.getElementById("rendimentosJurosContainer");
     if (!container) return;
 
     const anexoJ = this.data.anexoJ || {};
     const rendimentos = anexoJ.rendimentosCategoriaE || [];
-
-    if (this.tables.rendimentosJuros) {
-      container.innerHTML = "";
-    }
-
-    // Número da linha inicial (801)
-    let nextLinha = 801;
-    if (rendimentos.length > 0) {
-      const maxLinha = Math.max(
-        ...rendimentos.map((r) => parseInt(r.NLinha) || 0),
-      );
-      nextLinha = Math.max(801, maxLinha + 1);
-    }
 
     this.tables.rendimentosJuros = new DynamicTable(
       "rendimentosJurosContainer",
@@ -368,23 +526,26 @@ export class FormRenderer {
           CodRendimento: r.CodRendimento || "",
           CodPais: r.CodPais || "",
           RendimentoBruto: r.RendimentoBruto || "",
-          ImpostoPagoEstrangeiro: r.ImpostoPagoEstrangeiro || "",
-          CodPaisPagador: r.CodPaisPagador || "",
-          ImpostoRetido: r.ImpostoRetido || "",
-          NifEntidadeRetentora: r.NifEntidadeRetentora || "",
-          RetencaoFonte: r.RetencaoFonte || "",
+          ImpostoPagoEstrangeiroPaisFonte:
+            r.ImpostoPagoEstrangeiroPaisFonte || "",
+          CodPaisAgentePagador: r.CodPaisAgentePagador || "",
+          ImpostoRetidoAgente: r.ImpostoRetidoAgente || "",
+          NIFEntidadeRetentora: r.NIFEntidadeRetentora || "",
+          RetencaoFontePortugal: r.RetencaoFontePortugal || "",
         })),
         headers: [
           {
-            label: "Nº Linha (801 a ...)",
+            label: "Nº Linha (801...)",
             field: "NLinha",
             type: "auto-number",
+            options: { start: 801 },
             class: "col-nlinha",
           },
           {
             label: "Código Rendimento",
             field: "CodRendimento",
             type: "select",
+            options: CatalogoCodigosRendimento,
             class: "col-codigo",
           },
           {
@@ -392,39 +553,46 @@ export class FormRenderer {
             field: "CodPais",
             type: "select",
             class: "col-pais",
+            options: CatalogoPaises,
           },
           {
-            label: "Rendimento Bruto",
+            label: "Rendimento Bruto (€)",
             field: "RendimentoBruto",
             type: "number",
+            float: true,
+            defaultValue: 0,
             class: "col-valor",
           },
           {
-            label: "Imposto Pago no Estrangeiro",
-            field: "ImpostoPagoEstrangeiroGroup",
+            label: "Imposto pago no Estrangeiro",
+            field: "ImpostoEstrangeiroGroup",
             class: "col-imposto-estrangeiro",
             subHeaders: [
               {
-                label: "No país da fonte",
-                field: "ImpostoPagoEstrangeiro",
+                label: "No País da fonte (€)",
+                field: "ImpostoPagoEstrangeiroPaisFonte",
                 type: "number",
+                float: true,
+                defaultValue: 0,
                 class: "col-valor",
               },
               {
-                label: "País do Agente Pagador Diretiva da Poupança 2003/48/CE",
-                field: "PaisAgentePagadorGroup",
-                class: "col-pais-agente",
+                label: "País do Agente Pagador",
+                field: "AgentePagadorGroup",
                 subHeaders: [
                   {
                     label: "Código do País",
-                    field: "CodPaisPagador",
+                    field: "CodPaisAgentePagador",
                     type: "select",
                     class: "col-pais",
+                    options: CatalogoPaises,
                   },
                   {
-                    label: "Imposto retido",
-                    field: "ImpostoRetido",
+                    label: "Imposto retido (€)",
+                    field: "ImpostoRetidoAgente",
                     type: "number",
+                    float: true,
+                    defaultValue: 0,
                     class: "col-valor",
                   },
                 ],
@@ -433,29 +601,72 @@ export class FormRenderer {
           },
           {
             label: "Imposto Retido em Portugal",
-            field: "ImpostoRetidoPortugalGroup",
+            field: "ImpostoPortugalGroup",
             class: "col-imposto-portugal",
             subHeaders: [
               {
                 label: "NIF da Entidade Retentora",
-                field: "NifEntidadeRetentora",
+                field: "NIFEntidadeRetentora",
                 type: "text",
+                defaultValue: "",
                 class: "col-nif",
               },
               {
-                label: "Retenção na Fonte",
-                field: "RetencaoFonte",
+                label: "Retenção na Fonte (€)",
+                field: "RetencaoFontePortugal",
                 type: "number",
+                float: true,
+                defaultValue: 0,
                 class: "col-valor",
               },
             ],
           },
         ],
-        catalogs: {
-          CodRendimento: CatalogoCodigosRendimento,
-          CodPais: CatalogoPaises,
-          CodPaisPagador: CatalogoPaises,
-        },
+        footerGroups: [
+          {
+            label: "Soma Rendimento Bruto",
+            field: "somaRendimentoBruto",
+            value: (rows) =>
+              rows.reduce(
+                (s, r) => s + (parseFloat(r.RendimentoBruto) || 0),
+                0,
+              ),
+            formatter: (v) => v.toFixed(2) + " €",
+          },
+          {
+            label: "Soma Imposto no País Fonte",
+            field: "somaImpostoPaisFonte",
+            value: (rows) =>
+              rows.reduce(
+                (s, r) =>
+                  s + (parseFloat(r.ImpostoPagoEstrangeiroPaisFonte) || 0),
+                0,
+              ),
+            formatter: (v) => v.toFixed(2) + " €",
+          },
+          {
+            label: "Soma Imposto Retido (Agente)",
+            field: "somaImpostoRetidoAgente",
+            value: (rows) =>
+              rows.reduce(
+                (s, r) => s + (parseFloat(r.ImpostoRetidoAgente) || 0),
+                0,
+              ),
+            formatter: (v) => v.toFixed(2) + " €",
+          },
+          {
+            label: "Soma Retenção na Fonte (PT)",
+            field: "somaRetencaoPortugal",
+            value: (rows) =>
+              rows.reduce(
+                (s, r) => s + (parseFloat(r.RetencaoFontePortugal) || 0),
+                0,
+              ),
+            formatter: (v) => v.toFixed(2) + " €",
+          },
+        ],
+        paginated: true,
+        pageSize: 10,
         onChange: (newData) => {
           if (!this.data.anexoJ) this.data.anexoJ = {};
           this.data.anexoJ.rendimentosCategoriaE = newData;
@@ -465,30 +676,13 @@ export class FormRenderer {
     );
   }
 
-  // Método auxiliar para gerar números de linha automaticamente
-  generateLinhaNumber(row, idx, tableData) {
-    return 801 + idx;
-  }
-
   initMaisValiasJTable() {
+    if (this.tables.maisValiasJ) return;
     const container = document.getElementById("maisValiasJContainer");
     if (!container) return;
 
     const anexoJ = this.data.anexoJ || {};
     const maisValias = anexoJ.rendimentosCategoriaG || [];
-
-    if (this.tables.maisValiasJ) {
-      container.innerHTML = "";
-    }
-
-    // Número da linha inicial (951)
-    let nextLinha = 951;
-    if (maisValias.length > 0) {
-      const maxLinha = Math.max(
-        ...maisValias.map((r) => parseInt(r.NLinha) || 0),
-      );
-      nextLinha = Math.max(951, maxLinha + 1);
-    }
 
     this.tables.maisValiasJ = new DynamicTable("maisValiasJContainer", {
       data: maisValias.map((mv, idx) => ({
@@ -506,13 +700,14 @@ export class FormRenderer {
         DespesasEncargos: mv.DespesasEncargos || "",
         ImpostoPagoNoEstrangeiro: mv.ImpostoPagoNoEstrangeiro || "",
         CodPaisContraparte: mv.CodPaisContraparte || "",
-        RespeitaValoresMobiliarios: mv.RespeitaValoresMobiliarios || "",
+        RespeitaValoresMobiliarios: mv.RespeitaValoresMobiliarios || "N",
       })),
       headers: [
         {
-          label: "Nº Linha (951 a ...)",
+          label: "Nº Linha (951...)",
           field: "NLinha",
           type: "auto-number",
+          options: { start: 951 },
           class: "col-nlinha",
         },
         {
@@ -520,22 +715,13 @@ export class FormRenderer {
           field: "CodPais",
           type: "select",
           class: "col-pais",
+          options: CatalogoPaises,
         },
         {
           label: "Código",
           field: "Codigo",
-          type: "select-static",
-          options: [
-            {
-              value: "G01",
-              label: "G01 - Alienação onerosa de ações/partes sociais",
-            },
-            {
-              value: "G02",
-              label: "G02 - Alienação onerosa de outros valores mobiliários",
-            },
-            { value: "G03", label: "G03 - Outras alienações" },
-          ],
+          type: "select",
+          options: CatalogoCodigosRendimento,
           class: "col-codigo",
         },
         {
@@ -547,24 +733,32 @@ export class FormRenderer {
               label: "Ano",
               field: "AnoRealizacao",
               type: "number",
+              defaultValue: () => new Date().getFullYear(),
+              options: { min: 1900, max: 2099 },
               class: "col-data",
             },
             {
               label: "Mês",
               field: "MesRealizacao",
               type: "number",
+              defaultValue: () => new Date().getMonth() + 1,
+              options: { min: 1, max: 12 },
               class: "col-data",
             },
             {
               label: "Dia",
               field: "DiaRealizacao",
               type: "number",
+              defaultValue: () => new Date().getDate(),
+              options: { min: 1, max: 31 },
               class: "col-data",
             },
             {
-              label: "Valor",
+              label: "Valor (€)",
               field: "ValorRealizacao",
               type: "number",
+              float: true,
+              defaultValue: 0,
               class: "col-valor",
             },
           ],
@@ -578,38 +772,50 @@ export class FormRenderer {
               label: "Ano",
               field: "AnoAquisicao",
               type: "number",
+              defaultValue: () => new Date().getFullYear(),
+              options: { min: 1900, max: 2099 },
               class: "col-data",
             },
             {
               label: "Mês",
               field: "MesAquisicao",
               type: "number",
+              defaultValue: () => new Date().getMonth() + 1,
+              options: { min: 1, max: 12 },
               class: "col-data",
             },
             {
               label: "Dia",
               field: "DiaAquisicao",
               type: "number",
+              defaultValue: () => new Date().getDate(),
+              options: { min: 1, max: 31 },
               class: "col-data",
             },
             {
-              label: "Valor",
+              label: "Valor (€)",
               field: "ValorAquisicao",
               type: "number",
+              float: true,
+              defaultValue: 0,
               class: "col-valor",
             },
           ],
         },
         {
-          label: "Despesas e Encargos",
+          label: "Despesas e Encargos (€)",
           field: "DespesasEncargos",
           type: "number",
+          float: true,
+          defaultValue: 0,
           class: "col-valor",
         },
         {
-          label: "Imposto pago no Estrangeiro",
+          label: "Imposto pago no Estrangeiro (€)",
           field: "ImpostoPagoNoEstrangeiro",
           type: "number",
+          float: true,
+          defaultValue: 0,
           class: "col-valor",
         },
         {
@@ -617,23 +823,51 @@ export class FormRenderer {
           field: "CodPaisContraparte",
           type: "select",
           class: "col-pais",
+          options: CatalogoPaises,
         },
         {
-          label:
-            "Respeita a valores mobiliários admitidos à negociação ou a partes de OIC abertos?",
+          label: "Respeita valores mobiliários?",
           field: "RespeitaValoresMobiliarios",
-          type: "select-static",
-          options: [
-            { value: "S", label: "Sim" },
-            { value: "N", label: "Não" },
-          ],
+          type: "checkbox",
+          defaultValue: "N",
           class: "col-booleano",
         },
       ],
-      catalogs: {
-        CodPais: CatalogoPaises,
-        CodPaisContraparte: CatalogoPaises,
-      },
+      footerGroups: [
+        {
+          label: "Soma Valor Realização",
+          field: "somaRealizacao",
+          value: (rows) =>
+            rows.reduce((s, r) => s + (parseFloat(r.ValorRealizacao) || 0), 0),
+          formatter: (v) => v.toFixed(2) + " €",
+        },
+        {
+          label: "Soma Valor Aquisição",
+          field: "somaAquisicao",
+          value: (rows) =>
+            rows.reduce((s, r) => s + (parseFloat(r.ValorAquisicao) || 0), 0),
+          formatter: (v) => v.toFixed(2) + " €",
+        },
+        {
+          label: "Soma Despesas e Encargos",
+          field: "somaDespesas",
+          value: (rows) =>
+            rows.reduce((s, r) => s + (parseFloat(r.DespesasEncargos) || 0), 0),
+          formatter: (v) => v.toFixed(2) + " €",
+        },
+        {
+          label: "Soma Imposto pago no Estrangeiro",
+          field: "somaImpostoEstrangeiro",
+          value: (rows) =>
+            rows.reduce(
+              (s, r) => s + (parseFloat(r.ImpostoPagoNoEstrangeiro) || 0),
+              0,
+            ),
+          formatter: (v) => v.toFixed(2) + " €",
+        },
+      ],
+      paginated: true,
+      pageSize: 10,
       onChange: (newData) => {
         if (!this.data.anexoJ) this.data.anexoJ = {};
         this.data.anexoJ.rendimentosCategoriaG = newData;
@@ -689,7 +923,7 @@ export class FormRenderer {
               if (this.tables.maisValiasG) {
                 this.tables.maisValiasG.setEnabled(true);
               }
-              setTimeout(() => this.initMaisValiasGTable(), 50);
+              setTimeout(() => this.initAnexoGTable(), 50);
             } else {
               innerContent.classList.add("disabled-section-content");
               this.disableSectionContent(innerContent);
@@ -781,7 +1015,26 @@ export class FormRenderer {
       });
     }
 
-    // Radio buttons do Anexo H (declaração alternativa)
+    // Radio buttons do Anexo G
+
+    const radioSimG = container.querySelector(
+      'input[name="englobamentoAnexoG"][value="S"]',
+    );
+    const radioNaoG = container.querySelector(
+      'input[name="englobamentoAnexoG"][value="N"]',
+    );
+    if (radioSimG) {
+      radioSimG.addEventListener("change", (e) => {
+        if (e.target.checked) this.updateData("anexoG.englobamento", "S");
+      });
+    }
+    if (radioNaoG) {
+      radioNaoG.addEventListener("change", (e) => {
+        if (e.target.checked) this.updateData("anexoG.englobamento", "N");
+      });
+    }
+
+    // Radio buttons do Anexo H
     const radioSimH = container.querySelector(
       'input[name="declaracaoAlternativa"][value="S"]',
     );
@@ -829,6 +1082,53 @@ export class FormRenderer {
       });
     }
 
+    const radioSimSec8 = container.querySelector(
+      'input[name="englobamentoSec8"][value="S"]',
+    );
+    const radioNaoSec8 = container.querySelector(
+      'input[name="englobamentoSec8"][value="N"]',
+    );
+
+    if (radioSimSec8) {
+      radioSimSec8.addEventListener("change", (e) => {
+        if (e.target.checked) {
+          this.updateData("anexoJ.englobamentoSec8", "S");
+        }
+      });
+    }
+
+    if (radioNaoSec8) {
+      radioNaoSec8.addEventListener("change", (e) => {
+        if (e.target.checked) {
+          this.updateData("anexoJ.englobamentoSec8", "N");
+        }
+      });
+    }
+
+    // Radio buttons do Anexo J - Secção 9.2 (englobamento)
+    const radioSimSec92 = container.querySelector(
+      'input[name="englobamento"][value="S"]',
+    );
+    const radioNaoSec92 = container.querySelector(
+      'input[name="englobamento"][value="N"]',
+    );
+
+    if (radioSimSec92) {
+      radioSimSec92.addEventListener("change", (e) => {
+        if (e.target.checked) {
+          this.updateData("anexoJ.englobamento", "S");
+        }
+      });
+    }
+
+    if (radioNaoSec92) {
+      radioNaoSec92.addEventListener("change", (e) => {
+        if (e.target.checked) {
+          this.updateData("anexoJ.englobamento", "N");
+        }
+      });
+    }
+
     // Bind dos campos com data-path
     container.querySelectorAll("[data-path]").forEach((input) => {
       input.addEventListener("change", (e) => {
@@ -840,7 +1140,7 @@ export class FormRenderer {
 
     // Inicializar tabelas
     setTimeout(() => {
-      this.initMaisValiasGTable();
+      this.initAnexoGTable();
       this.initBeneficiosTable();
       this.initRendimentosJurosTable();
       this.initMaisValiasJTable();
@@ -861,6 +1161,24 @@ export class FormRenderer {
 
     if (this.onDataChange) {
       this.onDataChange(this.data);
+    }
+  }
+
+  activateTab(tabId) {
+    if (this.initializedTabs.has(tabId)) return;
+    this.initializedTabs.add(tabId);
+    switch (tabId) {
+      case "anexoG":
+        this.initAnexoGTable();
+        break;
+      case "anexoH":
+        this.initBeneficiosTable();
+        break;
+      case "anexoJ":
+        this.initRendimentosJurosTable();
+        setTimeout(() => this.initMaisValiasJTable(), 100);
+        setTimeout(() => this.initIbanTable(), 200);
+        break;
     }
   }
 
