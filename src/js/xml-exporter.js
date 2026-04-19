@@ -380,6 +380,44 @@ export class XMLExporter {
       somaImpostoEstrangeiro.toFixed(2),
     );
 
+    // Secção 9.2B - Outros Incrementos Patrimoniais
+    const maisValiasB = data.rendimentosCategoriaG_B || [];
+    this.updateTableRows(
+      anexo,
+      "AnexoJq092BT01",
+      "AnexoJq092BT01-Linha",
+      maisValiasB,
+      [
+        { field: "NLinha", format: "text" },
+        { field: "CodRendimento", format: "text" },
+        { field: "CodPais", format: "text" },
+        { field: "RendimentoLiquido", format: "decimal" },
+        { field: "ImpostoPagoEstrangeiro", format: "decimal" },
+        { field: "CodPaisContraparte", format: "text" },
+      ],
+    );
+
+    // Somas da secção 9.2B
+    const somaRendimentoB = maisValiasB.reduce(
+      (s, r) => s + (parseFloat(r.RendimentoLiquido) || 0),
+      0,
+    );
+    const somaImpostoB = maisValiasB.reduce(
+      (s, r) => s + (parseFloat(r.ImpostoPagoEstrangeiro) || 0),
+      0,
+    );
+    this.updateOrCreateSoma(
+      anexo,
+      "AnexoJq092BT01SomaC01",
+      somaRendimentoB.toFixed(2),
+    );
+    this.updateOrCreateSoma(
+      anexo,
+      "AnexoJq092BT01SomaC02",
+      somaImpostoB.toFixed(2),
+    );
+
+    // 9.2 C
     const englobamento = data.englobamento || "N";
     this.updateOrCreateElement(anexo, "AnexoJq092B01", englobamento);
 

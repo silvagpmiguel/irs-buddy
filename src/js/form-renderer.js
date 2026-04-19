@@ -4,6 +4,7 @@ import {
   CatalogoBeneficios,
   CatalogoCodigosRendimento,
   CatalogoPaises,
+  CatalogoCodigosRendimentoJ9B,
 } from "./constants/catalogs.js";
 
 export class FormRenderer {
@@ -480,7 +481,11 @@ export class FormRenderer {
                             <h5>A. Alienação Onerosa de Partes Sociais e Outros Valores Mobiliários</h5>
                             <div id="maisValiasJContainer"></div>
                         </div>
-                        
+                        <!-- Subsecção B - Outros Incrementos Patrimoniais de Opção de Englobamento -->
+                        <div class="sub-section">
+                          <h4>B - Outros Incrementos Patrimoniais de Opção de Englobamento</h4>
+                          <div id="maisValiasJContainerB"></div>
+                        </div>
                         <div class="sub-section">
                             <h5>C. Opção de Englobamento</h5>
                             <div class="question-box">
@@ -876,6 +881,105 @@ export class FormRenderer {
     });
   }
 
+  initMaisValiasJTableB() {
+    if (this.tables.maisValiasJB) return;
+    const container = document.getElementById("maisValiasJContainerB");
+    if (!container) return;
+
+    const anexoJ = this.data.anexoJ || {};
+    const maisValiasB = anexoJ.rendimentosCategoriaG_B || [];
+
+    this.tables.maisValiasJB = new DynamicTable("maisValiasJContainerB", {
+      data: maisValiasB.map((mv, idx) => ({
+        NLinha: mv.NLinha || 991 + idx,
+        CodRendimento: mv.CodRendimento || "",
+        CodPais: mv.CodPais || "",
+        RendimentoLiquido:
+          mv.RendimentoLiquido !== undefined ? mv.RendimentoLiquido : 0,
+        ImpostoPagoEstrangeiro:
+          mv.ImpostoPagoEstrangeiro !== undefined
+            ? mv.ImpostoPagoEstrangeiro
+            : 0,
+        CodPaisContraparte: mv.CodPaisContraparte || "",
+      })),
+      headers: [
+        {
+          label: "Nº Linha (991 a ...)",
+          field: "NLinha",
+          type: "auto-number",
+          options: { start: 991 },
+          class: "col-nlinha",
+        },
+        {
+          label: "Código Rendimento",
+          field: "CodRendimento",
+          type: "select",
+          options: CatalogoCodigosRendimentoJ9B,
+          class: "col-codigo",
+        },
+        {
+          label: "País da Fonte",
+          field: "CodPais",
+          type: "select",
+          options: CatalogoPaises,
+          class: "col-pais",
+        },
+        {
+          label: "Rendimento Líquido (€)",
+          field: "RendimentoLiquido",
+          type: "number",
+          float: true,
+          defaultValue: 0,
+          class: "col-valor",
+        },
+        {
+          label: "Imposto Pago no Estrangeiro (€)",
+          field: "ImpostoPagoEstrangeiro",
+          type: "number",
+          float: true,
+          defaultValue: 0,
+          class: "col-valor",
+        },
+        {
+          label: "País da Contraparte",
+          field: "CodPaisContraparte",
+          type: "select",
+          options: CatalogoPaises,
+          class: "col-pais",
+        },
+      ],
+      footerGroups: [
+        {
+          label: "Soma Rendimento Líquido",
+          field: "somaRendimento",
+          value: (rows) =>
+            rows.reduce(
+              (s, r) => s + (parseFloat(r.RendimentoLiquido) || 0),
+              0,
+            ),
+          formatter: (v) => v.toFixed(2) + " €",
+        },
+        {
+          label: "Soma Imposto Pago",
+          field: "somaImposto",
+          value: (rows) =>
+            rows.reduce(
+              (s, r) => s + (parseFloat(r.ImpostoPagoEstrangeiro) || 0),
+              0,
+            ),
+          formatter: (v) => v.toFixed(2) + " €",
+        },
+      ],
+      paginated: true,
+      pageSize: 10,
+      onChange: (newData) => {
+        if (!this.data.anexoJ) this.data.anexoJ = {};
+        this.data.anexoJ.rendimentosCategoriaG_B = newData;
+        this.onDataChange(this.data);
+      },
+    });
+  }
+
   initIbanTable() {
     const container = document.getElementById("ibanContainer");
     if (!container) return;
@@ -1176,8 +1280,9 @@ export class FormRenderer {
         break;
       case "anexoJ":
         this.initRendimentosJurosTable();
-        setTimeout(() => this.initMaisValiasJTable(), 100);
-        setTimeout(() => this.initIbanTable(), 200);
+        this.initMaisValiasJTable();
+        this.initMaisValiasJTableB();
+        this.initIbanTable();
         break;
     }
   }

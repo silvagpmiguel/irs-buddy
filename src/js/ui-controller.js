@@ -10,13 +10,13 @@ export class UIController {
     this.formRenderer = null;
   }
 
+  setFormRenderer(renderer) {
+    this.formRenderer = renderer;
+  }
+
   init() {
     this.initializeViews();
     this.setupNavigation();
-  }
-
-  setFormRenderer(renderer) {
-    this.formRenderer = renderer;
   }
 
   initializeViews() {
@@ -24,140 +24,132 @@ export class UIController {
     if (!app) return;
 
     app.innerHTML = `
-            <div id="homeView" class="view active">
-                <div class="app-container">
-                    <header class="main-header">
-                        <div class="logo-container">
-                            <div class="logo-icon">🧾</div>
-                            <div class="logo-text">
-                                <span class="logo-name">IRS Buddy</span>
-                                <span class="logo-badge">Beta</span>
-                            </div>
-                        </div>
-                        <nav class="main-nav">
-                            <a href="#" class="nav-link active" data-view="home">Início</a>
-                            <a href="#" class="nav-link" data-view="ajuda">Ajuda</a>
-                        </nav>
-                    </header>
+      <div id="homeView" class="view active">
+        <div class="app-container">
+          <header class="main-header">
+            <div class="logo-container">
+              <div class="logo-icon">🧾</div>
+              <div class="logo-text">
+                <span class="logo-name">IRS Buddy</span>
+                <span class="logo-badge">Beta</span>
+              </div>
+            </div>
+            <nav class="main-nav">
+              <a href="#" class="nav-link active" data-view="home">Início</a>
+              <a href="#" class="nav-link" data-view="ajuda">Ajuda</a>
+            </nav>
+          </header>
 
-                    <section class="hero">
-                        <h1 class="hero-title">Simplifique os seus <span class="highlight">Anexos IRS</span></h1>
-                        <p class="hero-subtitle">Carregue o ficheiro XML da AT e edite os anexos G, H e J com facilidade</p>
-                    </section>
+          <section class="hero">
+            <h1 class="hero-title">Simplifique os seus <span class="highlight">Anexos IRS</span></h1>
+            <p class="hero-subtitle">Carregue o ficheiro XML da AT e edite os anexos G, H e J com facilidade</p>
+          </section>
 
-                    <div class="content-grid">
-                        <div class="card upload-card">
-                            <div class="card-header">
-                                <div class="card-icon">📁</div>
-                                <h2 class="card-title">Upload do Ficheiro XML</h2>
-                                <p class="card-description">XML gerado pela aplicação da Autoridade Tributária</p>
-                            </div>
-                            
-                            <div class="upload-zone" id="uploadZone">
-                                <input type="file" id="fileInput" accept=".xml" class="file-input-hidden" />
-                                <div class="upload-content">
-                                    <div class="upload-icon">📄</div>
-                                    <h3 class="upload-title">Arraste ou clique para selecionar</h3>
-                                    <p class="upload-info">Suporte apenas para ficheiros XML (.xml)</p>
-                                    <button class="btn btn-primary" id="uploadButton">Selecionar Ficheiro</button>
-                                </div>
-                                <div class="file-preview" id="filePreview" style="display: none;">
-                                    <div class="file-info">
-                                        <span class="file-name" id="fileName"></span>
-                                        <span class="file-size" id="fileSize"></span>
-                                    </div>
-                                    <button class="btn-icon" id="clearFileBtn">✕</button>
-                                </div>
-                            </div>
-
-                            <div class="info-box">
-                                <div class="info-icon">ℹ️</div>
-                                <div class="info-text">
-                                    <strong>Anexos suportados:</strong><br>
-                                    📈 Anexo G - Mais-Valias e Rendimentos de Capitais<br>
-                                    🏥 Anexo H - Deduções à Coleta<br>
-                                    🌍 Anexo J - Rendimentos Estrangeiros
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card instructions-card">
-                            <div class="card-header">
-                                <div class="card-icon">🚀</div>
-                                <h2 class="card-title">Como funciona</h2>
-                            </div>
-                            
-                            <div class="steps-container">
-                                <div class="step-item">
-                                    <div class="step-number">1</div>
-                                    <div class="step-content">
-                                        <h3>Preencha na AT</h3>
-                                        <p>Preencha sua declaração no Portal das Finanças</p>
-                                    </div>
-                                </div>
-                                <div class="step-item">
-                                    <div class="step-number">2</div>
-                                    <div class="step-content">
-                                        <h3>Grave como XML</h3>
-                                        <p>Exporte a declaração em formato XML</p>
-                                    </div>
-                                </div>
-                                <div class="step-item">
-                                    <div class="step-number">3</div>
-                                    <div class="step-content">
-                                        <h3>Edite os Anexos</h3>
-                                        <p>Modifique os anexos G, H e J</p>
-                                    </div>
-                                </div>
-                                <div class="step-item">
-                                    <div class="step-number">4</div>
-                                    <div class="step-content">
-                                        <h3>Exporte e Submeta</h3>
-                                        <p>Exporte o XML atualizado para a AT</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <footer class="main-footer">
-                        <p>IRS Buddy © 2025 - Edição de Anexos IRS</p>
-                    </footer>
+          <div class="content-grid">
+            <div class="card upload-card">
+              <div class="card-header">
+                <div class="card-icon">📁</div>
+                <h2 class="card-title">Upload do Ficheiro XML</h2>
+                <p class="card-description">XML gerado pela aplicação da Autoridade Tributária</p>
+              </div>
+              
+              <div class="upload-zone" id="uploadZone">
+                <input type="file" id="fileInput" accept=".xml" class="file-input-hidden" />
+                <div class="upload-content">
+                  <div class="upload-icon">📄</div>
+                  <h3 class="upload-title">Arraste ou clique para selecionar</h3>
+                  <p class="upload-info">Suporte apenas para ficheiros XML (.xml)</p>
+                  <button class="btn btn-primary" id="uploadButton">Selecionar Ficheiro</button>
                 </div>
+                <div class="file-preview" id="filePreview" style="display: none;">
+                  <div class="file-info">
+                    <span class="file-name" id="fileName"></span>
+                    <span class="file-size" id="fileSize"></span>
+                  </div>
+                  <button class="btn-icon" id="clearFileBtn">✕</button>
+                </div>
+              </div>
+
+              <div class="info-box">
+                <div class="info-icon">ℹ️</div>
+                <div class="info-text">
+                  <strong>Anexos suportados:</strong><br>
+                  📈 Anexo G - Mais-Valias e Rendimentos de Capitais<br>
+                  🏥 Anexo H - Deduções à Coleta<br>
+                  🌍 Anexo J - Rendimentos Estrangeiros
+                </div>
+              </div>
             </div>
 
-            <div id="declaracaoView" class="view" style="display: none;">
-                <div class="app-container">
-                    <header class="main-header">
-                        <div class="logo-container">
-                            <div class="logo-icon">🧾</div>
-                            <div class="logo-text">
-                                <span class="logo-name">IRS Buddy</span>
-                                <span class="logo-badge">Edição</span>
-                            </div>
-                        </div>
-                        <nav class="main-nav">
-                            <a href="#" class="nav-link" data-view="home">Início</a>
-                            <a href="#" class="nav-link active" data-view="declaracao">Anexos</a>
-                        </nav>
-                    </header>
-
-                    <div class="declaracao-container">
-                        <div class="tabs-container" id="tabsContainer"></div>
-                        <div id="tabContent"></div>
-                        
-                        <div class="action-buttons">
-                            <button class="btn btn-secondary" id="backToHomeBtn">← Voltar ao Início</button>
-                            <button class="btn btn-primary" id="exportXMLBtn">💾 Exportar XML</button>
-                        </div>
-                    </div>
-
-                    <footer class="main-footer">
-                        <p>IRS Buddy © 2025 - Edição de Anexos IRS</p>
-                    </footer>
+            <div class="card instructions-card">
+              <div class="card-header">
+                <div class="card-icon">🚀</div>
+                <h2 class="card-title">Como funciona</h2>
+              </div>
+              
+              <div class="steps-container">
+                <div class="step-item">
+                  <div class="step-number">1</div>
+                  <div class="step-content">
+                    <h3>Preencha na AT</h3>
+                    <p>Preencha sua declaração no Portal das Finanças</p>
+                  </div>
                 </div>
+                <div class="step-item">
+                  <div class="step-number">2</div>
+                  <div class="step-content">
+                    <h3>Grave como XML</h3>
+                    <p>Exporte a declaração em formato XML</p>
+                  </div>
+                </div>
+                <div class="step-item">
+                  <div class="step-number">3</div>
+                  <div class="step-content">
+                    <h3>Edite os Anexos</h3>
+                    <p>Modifique os anexos G, H e J</p>
+                  </div>
+                </div>
+                <div class="step-item">
+                  <div class="step-number">4</div>
+                  <div class="step-content">
+                    <h3>Exporte e Submeta</h3>
+                    <p>Exporte o XML atualizado para a AT</p>
+                  </div>
+                </div>
+              </div>
             </div>
-        `;
+          </div>
+        </div>
+      </div>
+
+      <div id="declaracaoView" class="view" style="display: none;">
+        <div class="app-container">
+          <header class="main-header">
+            <div class="logo-container">
+              <div class="logo-icon">🧾</div>
+              <div class="logo-text">
+                <span class="logo-name">IRS Buddy</span>
+                <span class="logo-badge">Edição</span>
+              </div>
+            </div>
+            <nav class="main-nav">
+              <a href="#" class="nav-link active" data-view="home">Início</a>
+              <a href="#" class="nav-link" data-view="declaracao">Anexos</a>
+            </nav>
+          </header>
+
+          <div class="declaracao-container">
+            <div class="tabs-container" id="tabsContainer"></div>
+            <div id="tabContent"></div>
+            
+            <div class="action-buttons">
+              <button class="btn btn-secondary" id="backToHomeBtn">← Voltar ao Início</button>
+              <button class="btn btn-primary" id="exportXMLBtn">💾 Exportar XML</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
 
     this.homeView = document.getElementById("homeView");
     this.declaracaoView = document.getElementById("declaracaoView");
@@ -166,7 +158,6 @@ export class UIController {
   }
 
   setupNavigation() {
-    // Navegação entre views
     document.querySelectorAll("[data-view]").forEach((link) => {
       link.addEventListener("click", (e) => {
         e.preventDefault();
@@ -190,8 +181,6 @@ export class UIController {
       if (this.declaracaoView) this.declaracaoView.style.display = "block";
       this.currentView = "declaracao";
     }
-
-    // Update active nav link
     document.querySelectorAll("[data-view]").forEach((link) => {
       link.classList.remove("active");
       if (link.getAttribute("data-view") === viewName) {
@@ -203,10 +192,10 @@ export class UIController {
   renderTabs() {
     if (!this.tabsContainer) return;
     this.tabsContainer.innerHTML = `
-    <button class="tab-btn active" data-tab="anexoG">📈 Anexo G</button>
-    <button class="tab-btn" data-tab="anexoJ">🌍 Anexo J</button>
-    <button class="tab-btn" data-tab="anexoH">🏥 Anexo H</button>
-  `;
+      <button class="tab-btn active" data-tab="anexoG">📈 Anexo G</button>
+      <button class="tab-btn" data-tab="anexoJ">🌍 Anexo J</button>
+      <button class="tab-btn" data-tab="anexoH">🏥 Anexo H</button>
+      `;
     this.setupTabListeners();
   }
 
@@ -222,22 +211,14 @@ export class UIController {
   switchTab(tabId) {
     document.querySelectorAll(".tab-btn").forEach((btn) => {
       btn.classList.remove("active");
-      if (btn.getAttribute("data-tab") === tabId) {
-        btn.classList.add("active");
-      }
+      if (btn.getAttribute("data-tab") === tabId) btn.classList.add("active");
     });
-
     Object.keys(this.tabs).forEach((tab) => {
-      if (this.tabs[tab]) {
-        this.tabs[tab].style.display = "none";
-      }
+      if (this.tabs[tab]) this.tabs[tab].style.display = "none";
     });
-
-    if (this.tabs[tabId]) {
-      this.tabs[tabId].style.display = "block";
-    }
-
+    if (this.tabs[tabId]) this.tabs[tabId].style.display = "block";
     this.currentTab = tabId;
+
     if (
       this.formRenderer &&
       typeof this.formRenderer.activateTab === "function"
@@ -300,6 +281,7 @@ export class UIController {
   showError(message) {
     this.showToast(message, "error");
   }
+
   showToast(message, type) {
     const existingToast = document.querySelector(".toast");
     if (existingToast) existingToast.remove();

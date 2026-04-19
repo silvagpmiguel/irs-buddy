@@ -516,3 +516,32 @@ export const CatalogoCodigosRendimento = [
       "Rendimentos de capitais com origem em país, território ou região com regime fiscal claramente mais favorável",
   },
 ];
+export const CatalogoCodigosRendimentoJ9B = [
+  { value: "", label: "Selecione" },
+  {
+    value: "G30",
+    label:
+      "Operações relativas a instrumentos financeiros derivados (entre os quais, opções, futuros, forwards, swaps cambiais, swaps de taxa de juro e divisas e de operações cambiais a prazo), com exceção dos previstos na alínea q) do n.º 2 do artigo 5.º Código do IRS",
+  },
+  { value: "G31", label: "Warrants autónomos" },
+  {
+    value: "G32",
+    label:
+      "Certificados que atribuam direito a receber valor de ativo subjacente",
+  },
+  {
+    value: "G33",
+    label:
+      "Produtos financeiros complexos quando o risco de perda de capital existe",
+  },
+  {
+    value: "G97",
+    label:
+      "Alienação onerosa da propriedade intelectual ou industrial ou de experiência adquirida no sector comercial, industrial ou científico, quando o transmitente não seja o seu titular originário",
+  },
+  {
+    value: "G98",
+    label:
+      "Cessão onerosa de créditos, prestações acessórias e prestações suplementares",
+  },
+];

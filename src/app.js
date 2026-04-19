@@ -116,31 +116,36 @@ class IRSBuddy {
     const tabContent = document.getElementById("tabContent");
     if (!tabContent) return;
 
+    // Limpar conteúdo existente (por precaução)
+    tabContent.innerHTML = "";
+
+    // Adicionar as tabs com a correcta (anexoG) activa
     tabContent.innerHTML = `
-        <div id="anexoGTab" class="tab-content active">
-            <div class="card">
-                ${this.formRenderer.renderAnexoGForm()}
-            </div>
-        </div>
-        <div id="anexoJTab" class="tab-content" style="display: none;">
-            <div class="card">
-                ${this.formRenderer.renderAnexoJForm()}
-            </div>
-        </div>
-        <div id="anexoHTab" class="tab-content" style="display: none;">
-            <div class="card">
-                ${this.formRenderer.renderAnexoHForm()}
-            </div>
-        </div>
-    `;
+    <div id="anexoGTab" class="tab-content" style="display: block;">
+      <div class="card">
+        ${this.formRenderer.renderAnexoGForm()}
+      </div>
+    </div>
+    <div id="anexoJTab" class="tab-content" style="display: none;">
+      <div class="card">
+        ${this.formRenderer.renderAnexoJForm()}
+      </div>
+    </div>
+    <div id="anexoHTab" class="tab-content" style="display: none;">
+      <div class="card">
+        ${this.formRenderer.renderAnexoHForm()}
+      </div>
+    </div>
+  `;
 
     this.ui.tabs = {
       anexoG: document.getElementById("anexoGTab"),
-      anexoH: document.getElementById("anexoHTab"),
       anexoJ: document.getElementById("anexoJTab"),
+      anexoH: document.getElementById("anexoHTab"),
     };
 
     this.formRenderer.bindEvents(tabContent);
+    // Activar a tab G no formRenderer (para criar as tabelas)
     this.formRenderer.activateTab("anexoG");
     this.setupActionButtons();
   }
