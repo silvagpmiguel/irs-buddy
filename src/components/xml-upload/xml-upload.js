@@ -154,23 +154,4 @@ export class XMLUpload {
       uploadZone.classList.remove("upload-success");
     }, 1500);
   }
-
-  // Modificar handleFileSelect para chamar showSuccessFeedback
-  handleFileSelect(file) {
-    if (!file.name.toLowerCase().endsWith(".xml")) {
-      if (this.onUploadCallback) {
-        this.onUploadCallback(
-          null,
-          "Por favor, selecione um ficheiro XML válido.",
-        );
-      }
-      return;
-    }
-    this.currentFile = file;
-    this.displayFileInfo(file);
-    this.showSuccessFeedback(); // Adicionar feedback visual
-    if (this.onUploadCallback) {
-      this.onUploadCallback(file, null);
-    }
-  }
 }

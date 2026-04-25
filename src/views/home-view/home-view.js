@@ -226,16 +226,6 @@ export class HomeView {
     }
   }
 
-  setData(data, onDataChange) {
-    this.data = data;
-    this.onDataChange = onDataChange;
-    // Se já estiver no passo 3, recarregar a tab ativa
-    const step3 = this.element?.querySelector("#step3Container");
-    if (step3 && step3.style.display !== "none") {
-      this.renderActiveTab();
-    }
-  }
-
   attachEvents() {
     const tabs = this.element.querySelectorAll(".tab-btn");
     tabs.forEach((btn) => {

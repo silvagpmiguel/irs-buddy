@@ -14,8 +14,8 @@ export async function loadTemplate(componentPath) {
   }
 
   try {
-    // Caminho relativo à raiz do servidor (que é /src/)
-    const response = await fetch(`/${componentPath}.html`);
+    // Caminho relativo ao index.html (sem leading slash)
+    const response = await fetch(`${componentPath}.html`);
     if (!response.ok) {
       throw new Error(`Template not found: ${componentPath}`);
     }
@@ -42,7 +42,7 @@ export function loadStyles(componentPath) {
   const link = document.createElement("link");
   link.id = styleId;
   link.rel = "stylesheet";
-  link.href = `/${componentPath}.css`;
+  link.href = `${componentPath}.css`;
 
   link.onload = () => {
     styleCache.set(styleId, true);

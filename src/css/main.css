@@ -1,5 +1,5 @@
 /* src/css/main.css */
-@import url('/css/variables.css');
+@import url('./variables.css');
 
 * {
   margin: 0;
