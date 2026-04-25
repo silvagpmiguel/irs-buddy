@@ -235,6 +235,10 @@ export class XMLExporter {
         { field: "CodPais", format: "text" },
         { field: "RendimentoBruto", format: "decimal" },
         { field: "ImpostoPagoEstrangeiroPaisFonte", format: "decimal" },
+        { field: "ImpostoPagoEstrangeiroCodPaisPagador", format: "text" },
+        { field: "ImpostoPagoEstrangeiroImpostoRetido", format: "decimal" },
+        { field: "NIFEntRetentora", format: "text" },
+        { field: "RetencaoFonte", format: "decimal" },
       ],
     );
 

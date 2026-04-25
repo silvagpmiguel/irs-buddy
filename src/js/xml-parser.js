@@ -163,48 +163,13 @@ export class XMLParser {
 
     const anexo = anexoJ[0];
 
-    // Extrair IBAN (Quadro 11)
-    let iban = null;
-    const ibanTable = anexo.getElementsByTagNameNS(
-      this.namespace,
-      "AnexoJq11T01",
-    );
-    const altIbanTable = anexo.getElementsByTagName("AnexoJq11T01");
-    const tableToUse = ibanTable.length > 0 ? ibanTable : altIbanTable;
-
-    if (tableToUse.length > 0) {
-      const ibanLinha = tableToUse[0].getElementsByTagNameNS(
-        this.namespace,
-        "AnexoJq11T01-Linha",
-      );
-      const altIbanLinha =
-        tableToUse[0].getElementsByTagName("AnexoJq11T01-Linha");
-      const linha =
-        ibanLinha.length > 0
-          ? ibanLinha[0]
-          : altIbanLinha.length > 0
-            ? altIbanLinha[0]
-            : null;
-
-      if (linha) {
-        const ibanValue = this.getElementValue(linha, "Iban");
-        const bicValue = this.getElementValue(linha, "Bic");
-        if (ibanValue) {
-          iban = { Iban: ibanValue, Bic: bicValue || "" };
-        }
-      }
-    }
     // Obter opção de englobamento da secção 8
     let englobamentoSec8 = this.getElementValue(anexo, "AnexoJq08B01");
-    if (!englobamentoSec8) {
-      englobamentoSec8 = "N";
-    }
+    if (!englobamentoSec8) englobamentoSec8 = "N";
 
-    // Obter opção de englobamento da secção 9.2
+    // Obter opção de englobamento da secção 9.2 (C)
     let englobamentoSec92 = this.getElementValue(anexo, "AnexoJq092B01");
-    if (!englobamentoSec92) {
-      englobamentoSec92 = "N";
-    }
+    if (!englobamentoSec92) englobamentoSec92 = "N";
 
     this.parsedData.anexoJ = {
       presente: true,
@@ -220,9 +185,14 @@ export class XMLParser {
         "AnexoJq092AT01",
         "AnexoJq092AT01-Linha",
       ),
-      iban: iban,
-      englobamentoSec8: englobamentoSec8, // Novo campo
-      englobamento: englobamentoSec92, // Renomeado para clareza
+      rendimentosCategoriaG_B: this.getTableRows(
+        anexo,
+        "AnexoJq092BT01",
+        "AnexoJq092BT01-Linha",
+      ),
+      iban: this.getTableRows(anexo, "AnexoJq11T01", "AnexoJq11T01-Linha"),
+      englobamentoSec8: englobamentoSec8,
+      englobamento: englobamentoSec92,
     };
   }
 

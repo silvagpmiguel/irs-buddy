@@ -2,7 +2,8 @@
 import { DynamicTable } from "./table.js";
 import {
   CatalogoBeneficios,
-  CatalogoCodigosRendimento,
+  CatalogCodigosRendimentoJ9A,
+  CatalogoCodigosRendimentoJ8A,
   CatalogoPaises,
   CatalogoCodigosRendimentoJ9B,
 } from "./constants/catalogs.js";
@@ -533,10 +534,10 @@ export class FormRenderer {
           RendimentoBruto: r.RendimentoBruto || "",
           ImpostoPagoEstrangeiroPaisFonte:
             r.ImpostoPagoEstrangeiroPaisFonte || "",
-          CodPaisAgentePagador: r.CodPaisAgentePagador || "",
-          ImpostoRetidoAgente: r.ImpostoRetidoAgente || "",
-          NIFEntidadeRetentora: r.NIFEntidadeRetentora || "",
-          RetencaoFontePortugal: r.RetencaoFontePortugal || "",
+          CodPaisAgentePagador: r.ImpostoPagoEstrangeiroCodPaisPagador || "",
+          ImpostoRetidoAgente: r.ImpostoPagoEstrangeiroImpostoRetido || "",
+          NIFEntRetentora: r.NIFEntRetentora || "",
+          RetencaoFonte: r.RetencaoFonte || "",
         })),
         headers: [
           {
@@ -550,7 +551,7 @@ export class FormRenderer {
             label: "Código Rendimento",
             field: "CodRendimento",
             type: "select",
-            options: CatalogoCodigosRendimento,
+            options: CatalogoCodigosRendimentoJ8A,
             class: "col-codigo",
           },
           {
@@ -611,14 +612,14 @@ export class FormRenderer {
             subHeaders: [
               {
                 label: "NIF da Entidade Retentora",
-                field: "NIFEntidadeRetentora",
+                field: "NIFEntRetentora",
                 type: "text",
                 defaultValue: "",
                 class: "col-nif",
               },
               {
                 label: "Retenção na Fonte (€)",
-                field: "RetencaoFontePortugal",
+                field: "RetencaoFonte",
                 type: "number",
                 float: true,
                 defaultValue: 0,
@@ -688,7 +689,6 @@ export class FormRenderer {
 
     const anexoJ = this.data.anexoJ || {};
     const maisValias = anexoJ.rendimentosCategoriaG || [];
-
     this.tables.maisValiasJ = new DynamicTable("maisValiasJContainer", {
       data: maisValias.map((mv, idx) => ({
         NLinha: mv.NLinha || 951 + idx,
@@ -726,7 +726,7 @@ export class FormRenderer {
           label: "Código",
           field: "Codigo",
           type: "select",
-          options: CatalogoCodigosRendimento,
+          options: CatalogCodigosRendimentoJ9A,
           class: "col-codigo",
         },
         {
@@ -981,18 +981,14 @@ export class FormRenderer {
   }
 
   initIbanTable() {
+    if (this.tables.iban) return;
     const container = document.getElementById("ibanContainer");
     if (!container) return;
-
     const anexoJ = this.data.anexoJ || {};
-    const ibans = anexoJ.iban ? [anexoJ.iban] : [];
-
-    if (this.tables.iban) {
-      container.innerHTML = "";
-    }
+    const ibans = anexoJ.iban || [];
 
     this.tables.iban = new DynamicTable("ibanContainer", {
-      data: ibans.map((iban, idx) => ({
+      data: ibans.map((iban) => ({
         Iban: iban.Iban || "",
         Bic: iban.Bic || "",
       })),
@@ -1235,7 +1231,7 @@ export class FormRenderer {
 
     // Bind dos campos com data-path
     container.querySelectorAll("[data-path]").forEach((input) => {
-      input.addEventListener("change", (e) => {
+      input.addEventListener("change", () => {
         const path = input.getAttribute("data-path");
         const value = input.value;
         this.updateData(path, value);

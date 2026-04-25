@@ -403,6 +403,7 @@ export const CatalogoPaises = [
   { value: "604", label: "Peru" },
   { value: "258", label: "Polinésia Francesa" },
   { value: "616", label: "Polónia" },
+  { value: "620", label: "Portugal" },
   { value: "630", label: "Porto Rico" },
   { value: "404", label: "Quénia" },
   { value: "417", label: "Quirguistão" },
@@ -474,7 +475,7 @@ export const CatalogoPaises = [
   { value: "716", label: "Zimbabué" },
 ];
 
-export const CatalogoCodigosRendimento = [
+export const CatalogoCodigosRendimentoJ8A = [
   { value: "", label: "Selecione" },
   { value: "E01", label: "Royalties e Assistência Técnica" },
   {
@@ -514,6 +515,58 @@ export const CatalogoCodigosRendimento = [
     value: "E99",
     label:
       "Rendimentos de capitais com origem em país, território ou região com regime fiscal claramente mais favorável",
+  },
+];
+export const CatalogCodigosRendimentoJ9A = [
+  {
+    label: "Selecione",
+    value: "",
+  },
+  {
+    label: "Alienação onerosa de ações/partes sociais",
+    value: "G01",
+  },
+  {
+    label: "Alienação onerosa de quotas",
+    value: "G02",
+  },
+  {
+    label: "Remição e amortização com redução de capital de partes sociais",
+    value: "G03",
+  },
+  {
+    label:
+      "Extinção ou entrega de partes sociais das sociedades fundidas, cindidas ou adquiridas no âmbito de operações de fusão, cisão ou permuta de partes sociais",
+    value: "G04",
+  },
+  {
+    label:
+      "Valor atribuído em resultado da partilha, bem como em resultado da liquidação, revogação ou extinção de estruturas fiduciárias aos sujeitos passivos que as constituíram, nos termos dos artigos 81.º e 82.º do Código do IRC",
+    value: "G05",
+  },
+  {
+    label:
+      "Alienações de partes de capital que tenham por base 50% do valor em imóveis situados no outro Estado contratante",
+    value: "G06",
+  },
+  {
+    label:
+      "Alienação onerosa ou reembolso de obrigações e outros títulos de dívida",
+    value: "G10",
+  },
+  {
+    label:
+      "Resgates ou alienação de unidades de participação ou liquidação de fundos de investimento",
+    value: "G20",
+  },
+  {
+    label:
+      "Alienação onerosa de criptoativos que constituem valores mobiliários",
+    value: "G34",
+  },
+  {
+    label: "Alienação onerosa de outros valores mobiliários",
+    value: "G90",
   },
 ];
 export const CatalogoCodigosRendimentoJ9B = [
