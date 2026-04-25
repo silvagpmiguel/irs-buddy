@@ -1,40 +1,252 @@
-import { FormRenderer } from "./js/form-renderer.js";
-import { XMLExporter } from "./js/xml-exporter.js";
-import { UIController } from "./js/ui-controller.js";
+import { HomeView } from "./views/home-view/home-view.js";
 import { XMLParser } from "./js/xml-parser.js";
+import { XMLExporter } from "./js/xml-exporter.js";
 
 class IRSBuddy {
   constructor() {
-    this.ui = null;
-    this.formRenderer = null;
-    this.parsedData = null;
-    this.editedData = null;
-    this.currentFile = null;
-    this.exporting = false;
+    this.homeView = null;
+    this.data = null;
+    this.originalXmlString = null;
+    this.pdfParser = null;
   }
 
-  init() {
-    this.ui = new UIController();
-    this.ui.init();
-    this.setupUploadListeners();
-    this.setupActionButtons();
+  async init() {
+    await this.initializeApp();
+  }
+
+  async initializeApp() {
+    const app = document.getElementById("app");
+    if (!app) return;
+
+    // Criar e renderizar a home view
+    this.homeView = new HomeView();
+    const homeElement = await this.homeView.render();
+    app.appendChild(homeElement);
+
+    // Configurar callbacks
+    this.homeView.setOnFileUpload(async (file) => {
+      await this.processXMLFile(file);
+    });
+
+    this.homeView.setOnBrokerProcess(async (files) => {
+      await this.processBrokerFiles(files);
+    });
+
+    this.homeView.setOnExport(() => {
+      this.exportXML();
+    });
+  }
+
+  async processXMLFile(file) {
+    if (!file.name.toLowerCase().endsWith(".xml")) {
+      this.showError("Por favor, selecione um ficheiro XML válido.");
+      return;
+    }
+    this.readXMLFile(file);
+  }
+
+  readXMLFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => this.parseXML(e.target.result);
+    reader.onerror = () => this.showError("Erro ao ler o ficheiro.");
+    reader.readAsText(file, "UTF-8");
+  }
+
+  async parseXML(xmlString) {
+    this.originalXmlString = xmlString;
+    const parser = new XMLParser(xmlString);
+    const result = parser.parse();
+
+    if (result.success) {
+      this.data = result.data;
+      this.homeView.setData(this.data, (newData) => {
+        this.data = newData;
+      });
+      this.showSuccess(
+        "XML carregado! Agora importe os PDFs dos seus brokers.",
+      );
+    } else {
+      this.showError("Erro ao processar XML: " + result.error);
+    }
+  }
+
+  async processBrokerFiles(files) {
+    this.showSuccess("A processar PDFs...");
+
+    try {
+      const { PDFParser } = await import("./js/pdf-parser.js");
+      this.pdfParser = new PDFParser();
+
+      let totalRows92A = 0;
+      let totalRows92B = 0;
+      let totalRows8A = 0;
+
+      for (const [brokerId, brokerFiles] of Object.entries(files)) {
+        if (brokerId === "xtb") {
+          // Processar Capital Gains PDF (mais-valias)
+          if (brokerFiles.capitalGains) {
+            console.log("Processando Capital Gains PDF...");
+            const { rows92A, rows92B } = await this.pdfParser.parseCapitalGains(
+              brokerFiles.capitalGains,
+            );
+
+            console.log(
+              `Encontradas ${rows92A.length} linhas para a tabela 9.2A`,
+            );
+            console.log(
+              `Encontradas ${rows92B.length} linhas para a tabela 9.2B`,
+            );
+
+            totalRows92A = rows92A.length;
+            totalRows92B = rows92B.length;
+
+            // Adicionar ao Anexo J - 9.2A
+            if (rows92A.length > 0) {
+              this.addMaisValiasData(rows92A);
+            }
+
+            // Adicionar ao Anexo J - 9.2B
+            if (rows92B.length > 0) {
+              this.addOutrosIncrementosData(rows92B);
+            }
+          }
+
+          // Processar Investment Income PDF (dividendos/juros)
+          if (brokerFiles.investmentIncome) {
+            console.log("Processando Investment Income PDF...");
+            const { rows8A } = await this.pdfParser.parseInvestmentIncome(
+              brokerFiles.investmentIncome,
+            );
+
+            console.log(`Encontradas ${rows8A.length} linhas para a tabela 8A`);
+
+            totalRows8A = rows8A.length;
+
+            if (rows8A.length > 0) {
+              this.addRendimentosJurosData(rows8A);
+            }
+          }
+        }
+      }
+
+      // Forçar atualização da UI
+      if (this.homeView && this.homeView.currentAnexoComponent) {
+        // Recarregar as tabelas se estivermos no Anexo J
+        if (this.homeView.currentTab === "anexoJ") {
+          const anexoJ = this.homeView.currentAnexoComponent;
+
+          // Atualizar tabela 9.2A
+          if (
+            anexoJ.tables &&
+            anexoJ.tables.maisValiasJ &&
+            this.data.anexoJ?.rendimentosCategoriaG
+          ) {
+            anexoJ.tables.maisValiasJ.setData(
+              this.data.anexoJ.rendimentosCategoriaG,
+            );
+            console.log(
+              "Tabela 9.2A atualizada com",
+              this.data.anexoJ.rendimentosCategoriaG.length,
+              "linhas",
+            );
+          }
+
+          // Atualizar tabela 9.2B
+          if (
+            anexoJ.tables &&
+            anexoJ.tables.maisValiasJB &&
+            this.data.anexoJ?.rendimentosCategoriaG_B
+          ) {
+            anexoJ.tables.maisValiasJB.setData(
+              this.data.anexoJ.rendimentosCategoriaG_B,
+            );
+            console.log(
+              "Tabela 9.2B atualizada com",
+              this.data.anexoJ.rendimentosCategoriaG_B.length,
+              "linhas",
+            );
+          }
+
+          // Atualizar tabela 8A
+          if (
+            anexoJ.tables &&
+            anexoJ.tables.rendimentosJuros &&
+            this.data.anexoJ?.rendimentosCategoriaE
+          ) {
+            anexoJ.tables.rendimentosJuros.setData(
+              this.data.anexoJ.rendimentosCategoriaE,
+            );
+            console.log(
+              "Tabela 8A atualizada com",
+              this.data.anexoJ.rendimentosCategoriaE.length,
+              "linhas",
+            );
+          }
+        }
+      }
+
+      this.showSuccess(
+        `Dados importados com sucesso! (${totalRows92A + totalRows92B + totalRows8A} linhas)`,
+      );
+    } catch (error) {
+      console.error("Erro ao processar PDFs:", error);
+      this.showError("Erro ao processar PDFs: " + error.message);
+    }
+  }
+
+  addMaisValiasData(rows) {
+    if (!this.data) this.data = {};
+    if (!this.data.anexoJ) this.data.anexoJ = {};
+    if (!this.data.anexoJ.rendimentosCategoriaG) {
+      this.data.anexoJ.rendimentosCategoriaG = [];
+    }
+    this.data.anexoJ.rendimentosCategoriaG.push(...rows);
+    console.log(
+      "Dados adicionados a rendimentosCategoriaG:",
+      this.data.anexoJ.rendimentosCategoriaG.length,
+    );
+  }
+
+  addOutrosIncrementosData(rows) {
+    if (!this.data) this.data = {};
+    if (!this.data.anexoJ) this.data.anexoJ = {};
+    if (!this.data.anexoJ.rendimentosCategoriaG_B) {
+      this.data.anexoJ.rendimentosCategoriaG_B = [];
+    }
+    this.data.anexoJ.rendimentosCategoriaG_B.push(...rows);
+    console.log(
+      "Dados adicionados a rendimentosCategoriaG_B:",
+      this.data.anexoJ.rendimentosCategoriaG_B.length,
+    );
+  }
+
+  addRendimentosJurosData(rows) {
+    if (!this.data) this.data = {};
+    if (!this.data.anexoJ) this.data.anexoJ = {};
+    if (!this.data.anexoJ.rendimentosCategoriaE) {
+      this.data.anexoJ.rendimentosCategoriaE = [];
+    }
+    this.data.anexoJ.rendimentosCategoriaE.push(...rows);
+    console.log(
+      "Dados adicionados a rendimentosCategoriaE:",
+      this.data.anexoJ.rendimentosCategoriaE.length,
+    );
   }
 
   exportXML() {
-    if (this.exporting) return; // impede múltiplas exportações
-    if (!this.editedData) {
-      this.ui.showError("Não há dados para exportar.");
+    if (!this.data) {
+      this.showError("Não há dados para exportar.");
       return;
     }
     if (!this.originalXmlString) {
-      this.ui.showError("XML original não encontrado.");
+      this.showError("XML original não encontrado.");
       return;
     }
 
     const includedAnexos = {
-      anexoJ: this.editedData.anexoJ?.incluir !== false,
-      anexoH: this.editedData.anexoH?.incluir !== false,
-      anexoG: this.editedData.anexoG?.incluir !== false,
+      anexoJ: this.data.anexoJ?.incluir !== false,
+      anexoH: this.data.anexoH?.incluir !== false,
+      anexoG: this.data.anexoG?.incluir !== false,
     };
 
     if (
@@ -42,34 +254,29 @@ class IRSBuddy {
       !includedAnexos.anexoH &&
       !includedAnexos.anexoJ
     ) {
-      this.ui.showError("Nenhum anexo selecionado para exportar.");
+      this.showError("Nenhum anexo selecionado para exportar.");
       return;
     }
 
-    // Desabilita o botão e mostra loading
+    // Desabilitar botão durante a exportação
     const exportBtn = document.getElementById("exportXMLBtn");
     if (exportBtn) {
-      this.exporting = true;
       exportBtn.disabled = true;
       exportBtn.textContent = "⏳ A exportar...";
     }
 
-    // Pequeno delay para garantir que o botão é desabilitado visualmente
     setTimeout(() => {
       try {
-        const tableReferences = {
-          beneficiosTable: this.formRenderer?.tables?.beneficios,
-          rendimentosJurosTable: this.formRenderer?.tables?.rendimentosJuros,
-          maisValiasJTable: this.formRenderer?.tables?.maisValiasJ,
-          maisValiasGTable: this.formRenderer?.tables?.maisValiasG,
-        };
+        // TODO: Adicionar referências das tabelas quando disponíveis
+        const tableReferences = {};
 
         const exporter = new XMLExporter(
           this.originalXmlString,
-          this.editedData,
+          this.data,
           includedAnexos,
           tableReferences,
         );
+
         const result = exporter.export();
 
         if (result.success) {
@@ -82,191 +289,46 @@ class IRSBuddy {
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
-          this.ui.showSuccess(result.message);
+          this.showSuccess(result.message);
         } else {
-          this.ui.showError("Erro ao exportar: " + result.error);
+          this.showError("Erro ao exportar: " + result.error);
         }
       } catch (error) {
-        this.ui.showError("Erro inesperado: " + error.message);
+        this.showError("Erro inesperado: " + error.message);
       } finally {
-        // Reabilita o botão
         if (exportBtn) {
           exportBtn.disabled = false;
           exportBtn.textContent = "💾 Exportar XML";
         }
-        this.exporting = false;
       }
     }, 100);
   }
 
-  readXMLFile(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => this.parseXML(e.target.result);
-    reader.onerror = () => this.ui.showError("Erro ao ler o ficheiro.");
-    reader.readAsText(file, "UTF-8");
+  showSuccess(message) {
+    this.showToast(message, "success");
   }
 
-  renderDeclaracaoView() {
-    this.formRenderer = new FormRenderer(this.editedData, (newData) => {
-      this.editedData = newData;
-    });
-    this.ui.setFormRenderer(this.formRenderer);
-    this.ui.renderTabs();
-
-    const tabContent = document.getElementById("tabContent");
-    if (!tabContent) return;
-
-    // Limpar conteúdo existente (por precaução)
-    tabContent.innerHTML = "";
-
-    // Adicionar as tabs com a correcta (anexoG) activa
-    tabContent.innerHTML = `
-    <div id="anexoGTab" class="tab-content" style="display: block;">
-      <div class="card">
-        ${this.formRenderer.renderAnexoGForm()}
-      </div>
-    </div>
-    <div id="anexoJTab" class="tab-content" style="display: none;">
-      <div class="card">
-        ${this.formRenderer.renderAnexoJForm()}
-      </div>
-    </div>
-    <div id="anexoHTab" class="tab-content" style="display: none;">
-      <div class="card">
-        ${this.formRenderer.renderAnexoHForm()}
-      </div>
-    </div>
-  `;
-
-    this.ui.tabs = {
-      anexoG: document.getElementById("anexoGTab"),
-      anexoJ: document.getElementById("anexoJTab"),
-      anexoH: document.getElementById("anexoHTab"),
-    };
-
-    this.formRenderer.bindEvents(tabContent);
-    // Activar a tab G no formRenderer (para criar as tabelas)
-    this.formRenderer.activateTab("anexoG");
-    this.setupActionButtons();
+  showError(message) {
+    this.showToast(message, "error");
   }
 
-  parseXML(xmlString) {
-    this.originalXmlString = xmlString;
-    const parser = new XMLParser(xmlString);
-    const result = parser.parse();
+  showToast(message, type) {
+    const existingToast = document.querySelector(".toast");
+    if (existingToast) existingToast.remove();
 
-    if (result.success) {
-      this.parsedData = result.data;
-      this.editedData = JSON.parse(JSON.stringify(result.data));
-      this.renderDeclaracaoView();
-      this.ui.switchView("declaracao");
-      this.ui.showSuccess("XML carregado com sucesso!");
-    } else {
-      this.ui.showError("Erro ao processar XML: " + result.error);
-    }
-  }
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
 
-  setupUploadListeners() {
-    // Use setTimeout to ensure DOM is ready
     setTimeout(() => {
-      const uploadButton = document.getElementById("uploadButton");
-      const fileInput = document.getElementById("fileInput");
-      const uploadZone = document.getElementById("uploadZone");
-      const clearFileBtn = document.getElementById("clearFileBtn");
-
-      if (uploadButton) {
-        uploadButton.addEventListener("click", () => fileInput?.click());
-      }
-
-      if (fileInput) {
-        fileInput.addEventListener("change", (e) => this.handleFileSelect(e));
-      }
-
-      if (uploadZone) {
-        uploadZone.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          uploadZone.classList.add("drag-over");
-        });
-
-        uploadZone.addEventListener("dragleave", () => {
-          uploadZone.classList.remove("drag-over");
-        });
-
-        uploadZone.addEventListener("drop", (e) => {
-          e.preventDefault();
-          uploadZone.classList.remove("drag-over");
-          const files = e.dataTransfer.files;
-          if (files.length > 0) this.processFile(files[0]);
-        });
-      }
-
-      if (clearFileBtn) {
-        clearFileBtn.addEventListener("click", () => this.clearFile());
-      }
-    }, 100);
-  }
-
-  setupActionButtons() {
-    setTimeout(() => {
-      const backToHomeBtn = document.getElementById("backToHomeBtn");
-      const exportXMLBtn = document.getElementById("exportXMLBtn");
-
-      if (backToHomeBtn) {
-        backToHomeBtn.addEventListener("click", () =>
-          this.ui.switchView("home"),
-        );
-      }
-
-      if (exportXMLBtn) {
-        exportXMLBtn.addEventListener("click", () => this.exportXML());
-      }
-    }, 100);
-  }
-
-  handleFileSelect(event) {
-    const file = event.target.files[0];
-    if (file) this.processFile(file);
-  }
-
-  processFile(file) {
-    if (!file.name.toLowerCase().endsWith(".xml")) {
-      this.ui.showError("Por favor, selecione um ficheiro XML válido.");
-      return;
-    }
-
-    this.currentFile = file;
-    this.displayFileInfo(file);
-    this.readXMLFile(file);
-  }
-
-  displayFileInfo(file) {
-    const fileName = document.getElementById("fileName");
-    const fileSize = document.getElementById("fileSize");
-    const uploadContent = document.querySelector(".upload-content");
-    const filePreview = document.getElementById("filePreview");
-
-    if (fileName) fileName.textContent = file.name;
-    if (fileSize) fileSize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
-    if (uploadContent) uploadContent.style.display = "none";
-    if (filePreview) filePreview.style.display = "flex";
-  }
-
-  clearFile() {
-    const fileInput = document.getElementById("fileInput");
-    const uploadContent = document.querySelector(".upload-content");
-    const filePreview = document.getElementById("filePreview");
-
-    if (fileInput) fileInput.value = "";
-    if (uploadContent) uploadContent.style.display = "block";
-    if (filePreview) filePreview.style.display = "none";
-
-    this.currentFile = null;
-    this.parsedData = null;
-    this.editedData = null;
+      toast.style.animation = "slideOutRight 0.3s ease";
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
   }
 }
 
-// Initialize the application
+// Inicializar a aplicação
 document.addEventListener("DOMContentLoaded", () => {
   window.irsBuddy = new IRSBuddy();
   window.irsBuddy.init();

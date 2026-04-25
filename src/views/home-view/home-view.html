@@ -1,0 +1,55 @@
+<div class="app-container">
+  <header class="main-header">
+    <div class="logo-container">
+      <div class="logo-icon">🧾</div>
+      <div class="logo-text">
+        <span class="logo-name">IRS Buddy</span>
+        <span class="logo-badge">Beta</span>
+      </div>
+    </div>
+    <nav class="main-nav">
+      <a href="#" class="nav-link active" data-view="home">Início</a>
+    </nav>
+  </header>
+
+  <!-- Progress Steps - visível sempre -->
+  <div id="progressStepsContainer"></div>
+
+  <!-- Secção 1: Upload do XML -->
+  <div id="step1Container" class="step-section active">
+    <div class="hero">
+      <h1 class="hero-title">
+        Simplifique os seus <span class="highlight">Anexos IRS</span>
+      </h1>
+      <p class="hero-subtitle">
+        Carregue o ficheiro XML da AT e importe automaticamente os dados dos
+        seus brokers
+      </p>
+    </div>
+    <div id="xmlUploadContainer"></div>
+  </div>
+
+  <!-- Secção 2: Importação de Brokers -->
+  <div id="step2Container" class="step-section" style="display: none">
+    <div id="brokerImportContainer"></div>
+  </div>
+
+  <!-- Secção 3: Anexos -->
+  <div id="step3Container" class="step-section" style="display: none">
+    <div class="anexos-header">
+      <div class="tabs-container" id="tabsContainer">
+        <button class="tab-btn active" data-tab="anexoG">📈 Anexo G</button>
+        <button class="tab-btn" data-tab="anexoJ">🌍 Anexo J</button>
+        <button class="tab-btn" data-tab="anexoH">🏥 Anexo H</button>
+      </div>
+    </div>
+    <div id="tabContent" class="anexos-container"></div>
+    <div class="action-buttons">
+      <button class="btn btn-primary" id="exportXMLBtn">💾 Exportar XML</button>
+    </div>
+  </div>
+
+  <footer class="main-footer">
+    <p>IRS Buddy © FOSS</p>
+  </footer>
+</div>

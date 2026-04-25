@@ -1,0 +1,40 @@
+<div class="card upload-card">
+  <div class="card-header">
+    <div class="card-icon">📁</div>
+    <div class="header-text">
+      <h2 class="card-title">1. Ficheiro XML da AT</h2>
+      <p class="card-description">
+        Exportado pela aplicação da Autoridade Tributária
+      </p>
+    </div>
+  </div>
+
+  <div class="upload-zone" id="uploadZone">
+    <input type="file" id="fileInput" accept=".xml" class="file-input-hidden" />
+    <div class="upload-content">
+      <div class="upload-icon">📄</div>
+      <h3 class="upload-title">Arraste ou clique para selecionar</h3>
+      <p class="upload-info">Suporte apenas para ficheiros XML (.xml)</p>
+      <button class="btn btn-primary" id="uploadButton">
+        Selecionar Ficheiro
+      </button>
+    </div>
+    <div class="file-preview" id="filePreview" style="display: none">
+      <div class="file-info">
+        <span class="file-name" id="fileName"></span>
+        <span class="file-size" id="fileSize"></span>
+      </div>
+      <button class="btn-icon" id="clearFileBtn">✕</button>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <div class="info-icon">ℹ️</div>
+    <div class="info-text">
+      <strong>Anexos suportados:</strong><br />
+      📈 Anexo G - Mais-Valias e Rendimentos de Capitais<br />
+      🏥 Anexo H - Deduções à Coleta<br />
+      🌍 Anexo J - Rendimentos Estrangeiros
+    </div>
+  </div>
+</div>

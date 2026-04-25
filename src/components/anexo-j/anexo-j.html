@@ -1,0 +1,108 @@
+<div class="card">
+  <div class="card-header">
+    <div class="card-header-left">
+      <div class="card-icon">🌍</div>
+      <h2 class="card-title">Anexo J - Rendimentos Estrangeiros</h2>
+    </div>
+    <div class="toggle-container">
+      <label class="toggle-switch">
+        <input
+          type="checkbox"
+          id="incluirAnexoJ"
+          class="toggle-input"
+          checked
+        />
+        <span class="toggle-slider"></span>
+      </label>
+      <span class="toggle-label">Incluir Anexo J</span>
+    </div>
+  </div>
+
+  <div class="anexo-j-content">
+    <!-- Secção 8 - Rendimentos Capitais (Categoria E) -->
+    <div class="form-section">
+      <h3>8. Rendimentos Capitais (Categoria E)</h3>
+      <div class="sub-section">
+        <h4>A - Rendimentos de Juros</h4>
+        <div id="rendimentosJurosContainer" class="table-container"></div>
+      </div>
+      <div class="sub-section">
+        <h4>B - Opção de Englobamento</h4>
+        <div class="question-box">
+          <p class="question-text">
+            Opta pelo englobamento destes rendimentos?
+          </p>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="englobamentoSec8" value="S" />
+              <span>Sim</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="englobamentoSec8" value="N" checked />
+              <span>Não</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secção 9 - Rendimentos de Incrementos Patrimoniais (Categoria G) -->
+    <div class="form-section">
+      <h3>9. Rendimentos de Incrementos Patrimoniais (Categoria G)</h3>
+
+      <div class="sub-section">
+        <h4>9.2 Incrementos Patrimoniais de Opção de Englobamento</h4>
+
+        <!-- Subsecção A -->
+        <div class="sub-section">
+          <h5>
+            A. Alienação Onerosa de Partes Sociais e Outros Valores Mobiliários
+          </h5>
+          <div id="maisValiasJContainer" class="table-container"></div>
+        </div>
+
+        <!-- Subsecção B -->
+        <div class="sub-section">
+          <h5>B. Outros Incrementos Patrimoniais de Opção de Englobamento</h5>
+          <div id="maisValiasJContainerB" class="table-container"></div>
+        </div>
+
+        <!-- Subsecção C -->
+        <div class="sub-section">
+          <h5>C. Opção de Englobamento</h5>
+          <div class="question-box">
+            <p class="question-text">
+              1 - Opta pelo englobamento dos rendimentos do quadro 9.2?
+            </p>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="englobamentoSec92" value="S" />
+                <span>Sim</span>
+              </label>
+              <label class="radio-label">
+                <input
+                  type="radio"
+                  name="englobamentoSec92"
+                  value="N"
+                  checked
+                />
+                <span>Não</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secção 11 - Contas de Depósitos ou de Títulos Abertas Fora do Território Português -->
+    <div class="form-section">
+      <h3>
+        11. Contas de Depósitos ou de Títulos Abertas Fora do Território
+        Português
+      </h3>
+      <div class="sub-section">
+        <div id="ibanContainer" class="table-container"></div>
+      </div>
+    </div>
+  </div>
+</div>

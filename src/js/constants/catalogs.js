@@ -1,7 +1,3 @@
-// src/js/constants/catalogs.js - Catálogos centralizados
-
-// src/js/constants/catalogs.js - Catálogos centralizados
-
 export const CatalogoBeneficios = [
   { value: "", label: "Selecione" },
   {
@@ -517,7 +513,7 @@ export const CatalogoCodigosRendimentoJ8A = [
       "Rendimentos de capitais com origem em país, território ou região com regime fiscal claramente mais favorável",
   },
 ];
-export const CatalogCodigosRendimentoJ9A = [
+export const CatalogoCodigosRendimentoJ9A = [
   {
     label: "Selecione",
     value: "",

@@ -1,5 +1,3 @@
-// src/js/xml-parser.js - Parse do XML da AT
-
 export class XMLParser {
   constructor(xmlString) {
     this.xmlString = xmlString;

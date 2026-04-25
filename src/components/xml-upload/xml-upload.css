@@ -1,0 +1,194 @@
+.xml-upload .upload-card {
+  height: 100%;
+}
+
+.xml-upload .upload-zone {
+  margin: 1.5rem;
+  border: 2px dashed var(--border-color);
+  border-radius: var(--border-radius-sm);
+  background: var(--bg-light);
+  transition: var(--transition);
+  cursor: pointer;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.xml-upload .upload-zone.drag-over {
+  border-color: var(--primary-color);
+  background: rgba(15, 59, 44, 0.05);
+  transform: scale(0.98);
+}
+
+.xml-upload .file-input-hidden {
+  display: none;
+}
+
+.xml-upload .upload-content {
+  text-align: center;
+  padding: 2rem;
+}
+
+.xml-upload .upload-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.xml-upload .upload-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+}
+
+.xml-upload .upload-info {
+  font-size: 0.85rem;
+  color: var(--text-gray);
+  margin-bottom: 1.5rem;
+}
+
+.xml-upload .file-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: var(--bg-white);
+  border-radius: var(--border-radius-sm);
+  margin: 1rem;
+  border: 1px solid var(--border-color);
+}
+
+.xml-upload .file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.xml-upload .file-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--primary-color);
+}
+
+.xml-upload .file-size {
+  font-size: 0.75rem;
+  color: var(--text-gray);
+}
+
+.xml-upload .btn-icon {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--text-gray);
+  transition: var(--transition);
+  padding: 0.25rem 0.5rem;
+}
+
+.xml-upload .btn-icon:hover {
+  color: #dc3545;
+}
+
+.xml-upload .info-box {
+  margin: 1.5rem;
+  padding: 1rem;
+  background: #e8f4f0;
+  border-left: 4px solid var(--primary-color);
+  border-radius: var(--border-radius-sm);
+  display: flex;
+  gap: 1rem;
+}
+
+.xml-upload .info-icon {
+  font-size: 1.2rem;
+}
+
+.xml-upload .info-text {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--primary-dark);
+}
+
+.xml-upload .info-text strong {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* Animação de fade-in para o card */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animação de pulso para feedback */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(15, 59, 44, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(15, 59, 44, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(15, 59, 44, 0);
+  }
+}
+
+/* Animação de sucesso */
+@keyframes successCheck {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Classe para destacar secção */
+.highlight-section {
+  animation: pulse 0.6s ease-out;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Efeito de shimmer para loading */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
