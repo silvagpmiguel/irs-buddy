@@ -233,7 +233,7 @@ class IRSBuddy {
     );
   }
 
-  exportXML() {
+  async exportXML() {
     if (!this.data) {
       this.showError("Não há dados para exportar.");
       return;
@@ -243,65 +243,82 @@ class IRSBuddy {
       return;
     }
 
+    // Log para debug - ver o estado atual dos dados
+    console.log("Dados antes do export:", {
+      anexoG: {
+        incluir: this.data.anexoG?.incluir,
+        quadro09Length: this.data.anexoG?.quadro09?.length || 0,
+        quadro09: this.data.anexoG?.quadro09,
+      },
+      anexoJ: {
+        incluir: this.data.anexoJ?.incluir,
+        rendimentosCategoriaELength:
+          this.data.anexoJ?.rendimentosCategoriaE?.length || 0,
+        rendimentosCategoriaGLength:
+          this.data.anexoJ?.rendimentosCategoriaG?.length || 0,
+      },
+      anexoH: {
+        incluir: this.data.anexoH?.incluir,
+        beneficiosFiscaisLength:
+          this.data.anexoH?.beneficiosFiscais?.length || 0,
+      },
+    });
+
     const includedAnexos = {
       anexoJ: this.data.anexoJ?.incluir !== false,
       anexoH: this.data.anexoH?.incluir !== false,
       anexoG: this.data.anexoG?.incluir !== false,
     };
 
-    if (
-      !includedAnexos.anexoG &&
-      !includedAnexos.anexoH &&
-      !includedAnexos.anexoJ
-    ) {
-      this.showError("Nenhum anexo selecionado para exportar.");
-      return;
-    }
-
-    // Desabilitar botão durante a exportação
     const exportBtn = document.getElementById("exportXMLBtn");
     if (exportBtn) {
       exportBtn.disabled = true;
       exportBtn.textContent = "⏳ A exportar...";
     }
 
-    setTimeout(() => {
-      try {
-        // TODO: Adicionar referências das tabelas quando disponíveis
-        const tableReferences = {};
+    try {
+      // Aguardar que o home-view obtenha todas as referências das tabelas
+      // Isto é importante porque as tabelas podem não estar inicializadas se a tab não foi visitada
+      const tableReferences = await this.homeView.getAllTableReferences();
 
-        const exporter = new XMLExporter(
-          this.originalXmlString,
-          this.data,
-          includedAnexos,
-          tableReferences,
-        );
+      console.log("Table references obtidas:", {
+        maisValiasGTable: !!tableReferences.maisValiasGTable,
+        beneficiosTable: !!tableReferences.beneficiosTable,
+        rendimentosJurosTable: !!tableReferences.rendimentosJurosTable,
+        maisValiasJTable: !!tableReferences.maisValiasJTable,
+      });
 
-        const result = exporter.export();
+      const exporter = new XMLExporter(
+        this.originalXmlString,
+        this.data,
+        includedAnexos,
+      );
 
-        if (result.success) {
-          const blob = new Blob([result.xml], { type: "application/xml" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `declaracao_irs_atualizada_${new Date().toISOString().slice(0, 19)}.xml`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          this.showSuccess(result.message);
-        } else {
-          this.showError("Erro ao exportar: " + result.error);
-        }
-      } catch (error) {
-        this.showError("Erro inesperado: " + error.message);
-      } finally {
-        if (exportBtn) {
-          exportBtn.disabled = false;
-          exportBtn.textContent = "💾 Exportar XML";
-        }
+      const result = exporter.export();
+
+      if (result.success) {
+        const blob = new Blob([result.xml], { type: "application/xml" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `declaracao_irs_atualizada_${new Date().toISOString().slice(0, 19)}.xml`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        this.showSuccess(result.message);
+      } else {
+        this.showError("Erro ao exportar: " + result.error);
       }
-    }, 100);
+    } catch (error) {
+      console.error("Export error:", error);
+      this.showError("Erro inesperado: " + error.message);
+    } finally {
+      if (exportBtn) {
+        exportBtn.disabled = false;
+        exportBtn.textContent = "💾 Exportar XML";
+      }
+    }
   }
 
   showSuccess(message) {

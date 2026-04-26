@@ -608,7 +608,11 @@ export class DynamicTable {
   removeAllRows() {
     if (this.data.length === 0) return;
     if (!confirm(`Remover todas as ${this.data.length} linhas?`)) return;
+
+    console.log("removeAllRows - before:", this.data.length);
     this.data = [];
+    console.log("removeAllRows - after:", this.data.length);
+
     this.refreshData();
   }
 

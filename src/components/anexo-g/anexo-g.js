@@ -244,9 +244,18 @@ export class AnexoG {
         paginated: true,
         pageSize: 10,
         onChange: (newData) => {
+          console.log("Anexo G onChange - newData length:", newData.length);
+          console.log("Anexo G onChange - newData:", newData);
+
           if (!this.data) this.data = {};
           if (!this.data.anexoG) this.data.anexoG = {};
           this.data.anexoG.quadro09 = newData;
+
+          console.log(
+            "Anexo G onChange - data.anexoG.quadro09 length after update:",
+            this.data.anexoG.quadro09?.length,
+          );
+
           if (this.onDataChange) this.onDataChange(this.data);
         },
       });

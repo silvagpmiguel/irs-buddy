@@ -3,7 +3,7 @@ export class XMLParser {
     this.xmlString = xmlString;
     this.parser = new DOMParser();
     this.xmlDoc = null;
-    this.namespace = "http://www.dgci.gov.pt/2009/Modelo3IRSv2016";
+    this.namespace = "http://www.dgci.gov.pt/2009/Modelo3IRSv2026";
     this.parsedData = {
       anexoG: {},
       anexoH: {},

@@ -1,3 +1,4 @@
+// src/views/home-view/home-view.js
 import { loadTemplate, loadStyles } from "../../js/template-loader.js";
 import { ProgressSteps } from "../../components/progress-steps/progress-steps.js";
 import { XMLUpload } from "../../components/xml-upload/xml-upload.js";
@@ -15,13 +16,13 @@ export class HomeView {
     this.data = null;
     this.onDataChange = null;
     this.currentTab = "anexoG";
+
+    // Cache de componentes (apenas os que já foram ativados)
     this.anexoComponents = {
       anexoG: null,
       anexoH: null,
       anexoJ: null,
     };
-    this.isRendering = false; // Flag para evitar renderizações duplicadas
-    this.currentAnexoComponent = null; // Guardar referência do componente atual
 
     this.onFileUploadCallback = null;
     this.onBrokerProcessCallback = null;
@@ -100,86 +101,136 @@ export class HomeView {
       if (this.onBrokerProcessCallback) {
         await this.onBrokerProcessCallback(files);
         this.goToStep(3);
-        // Não chamar renderActiveTab aqui, pois goToStep já vai chamar
+        // Ao entrar no passo 3, inicializar a tab ativa
+        setTimeout(() => this.renderActiveTab(), 100);
       }
     });
   }
 
-  setData(data, onDataChange) {
-    this.data = data;
-    this.onDataChange = onDataChange;
-    // Só recarregar a tab se estivermos no passo 3 e se já tiver sido renderizada
-    const step3 = this.element?.querySelector("#step3Container");
-    if (step3 && step3.style.display !== "none" && this.currentAnexoComponent) {
-      this.refreshActiveTab();
+  async getOrCreateAnexoComponent(anexoId, forceCreate = false) {
+    // Se já existe em cache e não for force create, retornar
+    if (!forceCreate && this.anexoComponents[anexoId]) {
+      return this.anexoComponents[anexoId];
     }
-  }
 
-  async refreshActiveTab() {
-    // Atualizar os dados do componente atual sem recriar tudo
-    if (this.currentAnexoComponent && this.currentAnexoComponent.updateData) {
-      this.currentAnexoComponent.updateData(this.data);
-    } else {
-      // Fallback: recriar a tab
-      this.renderActiveTab();
+    // Se forceCreate=true e já existe, recriar?
+    if (forceCreate && this.anexoComponents[anexoId]) {
+      // Não recriar, apenas retornar o existente
+      // (os dados já estão lá, não precisamos recriar)
+      return this.anexoComponents[anexoId];
     }
+
+    // Criar novo componente
+    let AnexoClass;
+    switch (anexoId) {
+      case "anexoG":
+        AnexoClass = AnexoG;
+        break;
+      case "anexoH":
+        AnexoClass = AnexoH;
+        break;
+      case "anexoJ":
+        AnexoClass = AnexoJ;
+        break;
+      default:
+        return null;
+    }
+
+    const anexoComponent = new AnexoClass(this.data || {}, (newData) => {
+      this.data = newData;
+      if (this.onDataChange) this.onDataChange(this.data);
+    });
+
+    // Renderizar o componente
+    const element = await anexoComponent.render();
+    anexoComponent.element = element;
+
+    this.anexoComponents[anexoId] = anexoComponent;
+    return anexoComponent;
   }
 
   async renderActiveTab() {
     const tabContent = this.element.querySelector("#tabContent");
-    if (!tabContent) {
-      console.error("tabContent not found");
-      return;
-    }
+    if (!tabContent) return;
 
-    if (this.isRendering) {
-      console.log("Já está a renderizar, ignorando...");
-      return;
-    }
-
+    if (this.isRendering) return;
     this.isRendering = true;
-    console.log("Rendering tab:", this.currentTab);
 
-    // Mostrar loading
     tabContent.innerHTML = '<div class="loading-spinner">Carregando...</div>';
 
-    let anexoComponent;
-    switch (this.currentTab) {
-      case "anexoG":
-        anexoComponent = new AnexoG(this.data || {}, this.onDataChange);
-        break;
-      case "anexoH":
-        anexoComponent = new AnexoH(this.data || {}, this.onDataChange);
-        break;
-      case "anexoJ":
-        anexoComponent = new AnexoJ(this.data || {}, this.onDataChange);
-        break;
-      default:
-        this.isRendering = false;
-        console.error("Tab desconhecida:", this.currentTab);
-        return;
-    }
-
     try {
-      tabContent.innerHTML = "";
-      const element = await anexoComponent.render();
-      tabContent.appendChild(element);
-      this.currentAnexoComponent = anexoComponent;
-      console.log("Tab rendered successfully");
+      // Obter ou criar o componente do anexo (as tabelas serão inicializadas aqui)
+      const anexoComponent = await this.getOrCreateAnexoComponent(
+        this.currentTab,
+      );
+
+      if (anexoComponent && anexoComponent.element) {
+        tabContent.innerHTML = "";
+        tabContent.appendChild(anexoComponent.element);
+        this.currentAnexoComponent = anexoComponent;
+        console.log(`Tab ${this.currentTab} rendered successfully`);
+      } else {
+        throw new Error("Componente não retornou elemento válido");
+      }
     } catch (error) {
       console.error("Error rendering anexo:", error);
       tabContent.innerHTML =
-        '<div class="error">Erro ao carregar o anexo: ' +
-        error.message +
-        "</div>";
+        '<div class="error">Erro ao carregar o anexo</div>';
     }
 
     this.isRendering = false;
   }
 
-  switchTab(tabId) {
-    if (this.currentTab === tabId) return; // Não trocar para a mesma tab
+  async getAllTableReferences() {
+    const references = {};
 
+    // Garantir que todos os anexos estão inicializados (reutilizando o método existente)
+    const anexosToInitialize = ["anexoG", "anexoH", "anexoJ"];
+
+    for (const anexoId of anexosToInitialize) {
+      await this.getOrCreateAnexoComponent(anexoId, true);
+    }
+
+    // CORREÇÃO: Usar this.anexoComponents em vez de this.anexoGComponent, etc.
+    const anexoGComp = this.anexoComponents.anexoG;
+    const anexoHComp = this.anexoComponents.anexoH;
+    const anexoJComp = this.anexoComponents.anexoJ;
+
+    // Anexo G
+    if (anexoGComp?.tables?.anexoG) {
+      references.maisValiasGTable = anexoGComp.tables.anexoG;
+      console.log("✅ Referência do Anexo G obtida");
+    } else {
+      console.warn("⚠️ Anexo G não tem tabela anexoG", anexoGComp?.tables);
+    }
+
+    // Anexo H
+    if (anexoHComp?.tables?.beneficios) {
+      references.beneficiosTable = anexoHComp.tables.beneficios;
+      console.log("✅ Referência do Anexo H obtida");
+    } else {
+      console.warn("⚠️ Anexo H não tem tabela beneficios", anexoHComp?.tables);
+    }
+
+    // Anexo J
+    if (anexoJComp?.tables) {
+      references.rendimentosJurosTable = anexoJComp.tables.rendimentosJuros;
+      references.maisValiasJTable = anexoJComp.tables.maisValiasJ;
+      references.maisValiasJBTable = anexoJComp.tables.maisValiasJB;
+      console.log("✅ Referências do Anexo J obtidas", {
+        rendimentosJurosTable: !!references.rendimentosJurosTable,
+        maisValiasJTable: !!references.maisValiasJTable,
+        maisValiasJBTable: !!references.maisValiasJBTable,
+      });
+    } else {
+      console.warn("⚠️ Anexo J não tem tables", anexoJComp);
+    }
+
+    return references;
+  }
+
+  switchTab(tabId) {
+    if (this.currentTab === tabId) return;
     this.currentTab = tabId;
 
     const tabs = this.element.querySelectorAll(".tab-btn");
@@ -194,7 +245,6 @@ export class HomeView {
   }
 
   goToStep(step) {
-    // Esconder todas as secções
     const step1 = this.element.querySelector("#step1Container");
     const step2 = this.element.querySelector("#step2Container");
     const step3 = this.element.querySelector("#step3Container");
@@ -203,12 +253,10 @@ export class HomeView {
     if (step2) step2.style.display = "none";
     if (step3) step3.style.display = "none";
 
-    // Mostrar a secção correspondente
     if (step === 1 && step1) step1.style.display = "block";
     if (step === 2 && step2) step2.style.display = "block";
     if (step === 3 && step3) step3.style.display = "block";
 
-    // Atualizar progress steps
     if (this.progressSteps) {
       if (step === 1) {
         this.progressSteps.reset();
@@ -218,11 +266,38 @@ export class HomeView {
       } else if (step === 3) {
         this.progressSteps.completeStep(2);
         this.progressSteps.setCurrentStep(3);
-        // Só renderizar a tab se ainda não foi renderizada
-        if (!this.currentAnexoComponent) {
+        // Apenas mostrar a tab ativa se já tiver dados
+        if (this.data) {
           setTimeout(() => this.renderActiveTab(), 50);
         }
       }
+    }
+  }
+
+  setData(data, onDataChange) {
+    this.data = data;
+    this.onDataChange = onDataChange;
+
+    // Atualizar dados em todos os componentes em cache (se existirem)
+    Object.values(this.anexoComponents).forEach((component) => {
+      if (component && component.data) {
+        component.data = data;
+        // Se a tabela já existe, recarregar os dados
+        if (component.tables) {
+          // Recarregar cada tabela
+          Object.values(component.tables).forEach((table) => {
+            if (table && table.setData) {
+              // Não recarregar para evitar loops, apenas atualizar referência
+            }
+          });
+        }
+      }
+    });
+
+    // Se já estiver no passo 3, recarregar a tab ativa
+    const step3 = this.element?.querySelector("#step3Container");
+    if (step3 && step3.style.display !== "none") {
+      this.renderActiveTab();
     }
   }
 
@@ -267,5 +342,11 @@ export class HomeView {
     this.goToStep(1);
     if (this.xmlUpload) this.xmlUpload.clearFile();
     if (this.brokerImport) this.brokerImport.reset();
+    // Limpar cache dos anexos para recomeçar
+    this.anexoComponents = {
+      anexoG: null,
+      anexoH: null,
+      anexoJ: null,
+    };
   }
 }
