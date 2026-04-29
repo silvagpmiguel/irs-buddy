@@ -110,12 +110,12 @@ export class BrokerImport {
     section.className = "broker-upload-section";
     section.style.display = "block";
     section.innerHTML = `
-      <h3>${broker.name} - Faça upload dos PDFs</h3>
-      <p class="info-text">${broker.instructions || ""}</p>
-      <div class="upload-grid" id="${brokerId}-upload-grid"></div>
-    `;
-    sectionsContainer.appendChild(section);
+    <h3>${broker.name} - Faça upload dos PDFs</h3>
+    ${broker.instructions || ""}
+    <div class="upload-grid" id="${brokerId}-upload-grid"></div>
+  `;
 
+    sectionsContainer.appendChild(section);
     this.initUploadSection(brokerId);
   }
 

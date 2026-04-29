@@ -73,8 +73,45 @@ export class HomeView {
         name: "XTB",
         icon: "📈",
         description: "Plataforma de investimento internacional",
-        instructions:
-          'A XTB disponibiliza dois relatórios em PDF: "Capital Gains" (mais-valias) e "Investment Income" (dividendos/juros).',
+        instructions: `
+      <div class="broker-instructions">
+        <div class="instructions-steps">
+          <div class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <a href="https://xstation5.xtb.com/" target="_blank" rel="noopener noreferrer" class="step-link">
+                <strong>Aceda à XTB</strong>
+              </a>
+              <span class="step-detail">Faça login na plataforma X Station 5</span>
+            </div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <strong>Dirija-se à secção "A minha conta"</strong>
+              <span class="step-detail">No menu principal da plataforma</span>
+            </div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <strong>Selecione a opção "Documentos"</strong>
+              <span class="step-detail">Aceda à área de relatórios e documentos</span>
+            </div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step-item">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <strong>Descarregue os documentos fiscais</strong>
+              <span class="step-detail">Capital Gains e Dividends & Interests para o ano em questão</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
         requiredFiles: [
           {
             type: "capitalGains",
