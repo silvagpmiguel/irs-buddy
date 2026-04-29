@@ -1,4 +1,3 @@
-// src/js/xml-exporter.js
 export class XMLExporter {
   constructor(originalXmlString, editedData, includedAnexos) {
     this.originalXmlString = originalXmlString;

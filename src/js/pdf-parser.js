@@ -1,4 +1,3 @@
-// src/js/pdf-parser.js
 export class PDFParser {
   constructor() {
     this.pdfjsLib = window.pdfjsLib;

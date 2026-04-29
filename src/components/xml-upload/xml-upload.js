@@ -1,17 +1,16 @@
 import { loadTemplate, loadStyles } from "../../js/template-loader.js";
+import { FileInputArea } from "../file-input-area/file-input-area.js";
 
 export class XMLUpload {
   constructor() {
     this.element = null;
+    this.fileInputArea = null;
     this.onUploadCallback = null;
-    this.currentFile = null;
   }
 
   async render() {
-    // Carregar estilos específicos do componente
     loadStyles("components/xml-upload/xml-upload");
 
-    // Carregar template HTML
     const template = await loadTemplate("components/xml-upload/xml-upload");
 
     const container = document.createElement("div");
@@ -19,96 +18,70 @@ export class XMLUpload {
     container.innerHTML = template;
 
     this.element = container;
-    this.attachEvents();
+
+    await this.initFileInputArea();
+
     return this.element;
   }
 
-  attachEvents() {
-    const uploadButton = this.element.querySelector("#uploadButton");
-    const fileInput = this.element.querySelector("#fileInput");
-    const uploadZone = this.element.querySelector("#uploadZone");
-    const clearFileBtn = this.element.querySelector("#clearFileBtn");
-
-    if (uploadButton) {
-      uploadButton.addEventListener("click", () => fileInput?.click());
-    }
-
-    if (fileInput) {
-      fileInput.addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (file) this.handleFileSelect(file);
-      });
-    }
-
-    if (uploadZone) {
-      uploadZone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        uploadZone.classList.add("drag-over");
-      });
-
-      uploadZone.addEventListener("dragleave", () => {
-        uploadZone.classList.remove("drag-over");
-      });
-
-      uploadZone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        uploadZone.classList.remove("drag-over");
-        const files = e.dataTransfer.files;
-        if (files.length > 0) this.handleFileSelect(files[0]);
-      });
-    }
-
-    if (clearFileBtn) {
-      clearFileBtn.addEventListener("click", () => this.clearFile());
-    }
-  }
-
-  handleFileSelect(file) {
-    if (!file.name.toLowerCase().endsWith(".xml")) {
-      if (this.onUploadCallback) {
-        this.onUploadCallback(
-          null,
-          "Por favor, selecione um ficheiro XML válido.",
-        );
-      }
+  async initFileInputArea() {
+    const container = this.element.querySelector("#xmlFileInputContainer");
+    if (!container) {
+      console.error("Container #xmlFileInputContainer não encontrado");
       return;
     }
-    this.currentFile = file;
-    this.displayFileInfo(file);
-    if (this.onUploadCallback) {
-      this.onUploadCallback(file, null);
-    }
-  }
 
-  displayFileInfo(file) {
-    const fileName = this.element.querySelector("#fileName");
-    const fileSize = this.element.querySelector("#fileSize");
-    const uploadContent = this.element.querySelector(".upload-content");
-    const filePreview = this.element.querySelector("#filePreview");
+    this.fileInputArea = new FileInputArea({
+      type: "xml",
+      accept: ".xml",
+      title: "Ficheiro XML da AT",
+      description: "Exportado pela aplicação da Autoridade Tributária",
+      icon: "📁",
+      onFileChange: (file, error) => {
+        console.log(
+          "XMLUpload - onFileChange:",
+          file ? file.name : "null",
+          error,
+        );
 
-    if (fileName) fileName.textContent = file.name;
-    if (fileSize) fileSize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
-    if (uploadContent) uploadContent.style.display = "none";
-    if (filePreview) filePreview.style.display = "flex";
-  }
+        if (error) {
+          if (this.onUploadCallback) {
+            this.onUploadCallback(null, error);
+          }
+        } else if (file) {
+          if (this.onUploadCallback) {
+            this.onUploadCallback(file, null);
+          }
+        } else {
+          if (this.onUploadCallback) {
+            this.onUploadCallback(null, null);
+          }
+        }
+      },
+    });
 
-  clearFile() {
-    const fileInput = this.element.querySelector("#fileInput");
-    const uploadContent = this.element.querySelector(".upload-content");
-    const filePreview = this.element.querySelector("#filePreview");
+    const element = await this.fileInputArea.render();
+    container.appendChild(element);
 
-    if (fileInput) fileInput.value = "";
-    if (uploadContent) uploadContent.style.display = "block";
-    if (filePreview) filePreview.style.display = "none";
-
-    this.currentFile = null;
-    if (this.onUploadCallback) {
-      this.onUploadCallback(null, null);
-    }
+    // Debug: verificar se o botão existe
+    const selectBtn = element.querySelector(".select-file-btn");
+    console.log("XMLUpload - botão selecionar encontrado:", !!selectBtn);
   }
 
   getFile() {
-    return this.currentFile;
+    return this.fileInputArea?.getFile() || null;
+  }
+
+  clearFile() {
+    if (this.fileInputArea) {
+      const fileInput = this.element.querySelector(".file-input-hidden");
+      const emptyState = this.element.querySelector(".file-input-empty-state");
+      const preview = this.element.querySelector(".file-input-preview");
+      const statusDiv = this.element.querySelector(".file-input-status");
+      if (fileInput && emptyState && preview) {
+        this.fileInputArea.clearFile(fileInput, emptyState, preview, statusDiv);
+      }
+    }
   }
 
   setOnUpload(callback) {
@@ -116,42 +89,10 @@ export class XMLUpload {
   }
 
   showSuccessFeedback() {
-    const uploadZone = this.element.querySelector("#uploadZone");
-    if (!uploadZone) return;
-
-    // Adicionar classe de sucesso
-    uploadZone.classList.add("upload-success");
-
-    // Criar elemento de feedback
-    const successIcon = document.createElement("div");
-    successIcon.className = "upload-success-icon";
-    successIcon.innerHTML = "✅";
-    successIcon.style.cssText = `
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    font-size: 3rem;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 10;
-  `;
-    uploadZone.style.position = "relative";
-    uploadZone.appendChild(successIcon);
-
-    // Animação do ícone
-    setTimeout(() => {
-      successIcon.style.transition = "transform 0.3s ease, opacity 0.3s ease";
-      successIcon.style.transform = "translate(-50%, -50%) scale(1)";
-      successIcon.style.opacity = "1";
-    }, 10);
-
-    // Remover após animação
-    setTimeout(() => {
-      successIcon.style.transform = "translate(-50%, -50%) scale(0)";
-      successIcon.style.opacity = "0";
-      setTimeout(() => successIcon.remove(), 300);
-      uploadZone.classList.remove("upload-success");
-    }, 1500);
+    const card = this.element.querySelector(".file-input-area-card");
+    if (card) {
+      card.classList.add("upload-success");
+      setTimeout(() => card.classList.remove("upload-success"), 600);
+    }
   }
 }

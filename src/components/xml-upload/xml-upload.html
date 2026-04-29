@@ -2,39 +2,78 @@
   <div class="card-header">
     <div class="card-icon">📁</div>
     <div class="header-text">
-      <h2 class="card-title">1. Ficheiro XML da AT</h2>
+      <h2 class="card-title">1. Importe o ficheiro pré-preenchido pela AT</h2>
       <p class="card-description">
-        Exportado pela aplicação da Autoridade Tributária
+        Siga os passos abaixo para obter o seu XML no
+        <a
+          href="https://irs.portaldasfinancas.gov.pt/app/home"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link-external"
+        >
+          Portal das Finanças
+        </a>
       </p>
     </div>
   </div>
 
-  <div class="upload-zone" id="uploadZone">
-    <input type="file" id="fileInput" accept=".xml" class="file-input-hidden" />
-    <div class="upload-content">
-      <div class="upload-icon">📄</div>
-      <h3 class="upload-title">Arraste ou clique para selecionar</h3>
-      <p class="upload-info">Suporte apenas para ficheiros XML (.xml)</p>
-      <button class="btn btn-primary" id="uploadButton">
-        Selecionar Ficheiro
-      </button>
-    </div>
-    <div class="file-preview" id="filePreview" style="display: none">
-      <div class="file-info">
-        <span class="file-name" id="fileName"></span>
-        <span class="file-size" id="fileSize"></span>
+  <!-- Instruções visíveis primeiro -->
+  <div class="instructions-steps">
+    <div class="step-item">
+      <div class="step-number">1</div>
+      <div class="step-content">
+        <a
+          href="https://irs.portaldasfinancas.gov.pt/app/home"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="step-link"
+        >
+          <strong>Aceda ao Portal das Finanças</strong>
+        </a>
+        <span class="step-detail">Faça login com as suas credenciais</span>
       </div>
-      <button class="btn-icon" id="clearFileBtn">✕</button>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step-item">
+      <div class="step-number">2</div>
+      <div class="step-content">
+        <strong>Entregar Declaração</strong>
+        <span class="step-detail">Navegue até à área do IRS</span>
+      </div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step-item">
+      <div class="step-number">3</div>
+      <div class="step-content">
+        <strong>Obtenção de declaração pré-preenchida</strong>
+        <span class="step-detail">Preencha os seus dados</span>
+      </div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step-item">
+      <div class="step-number">4</div>
+      <div class="step-content">
+        <strong>Gravar ficheiro XML</strong>
+        <span class="step-detail">Clique em "Gravar" para descarregar</span>
+      </div>
     </div>
   </div>
 
+  <!-- Container onde o FileInputArea será renderizado -->
+  <div id="xmlFileInputContainer"></div>
+
   <div class="info-box">
-    <div class="info-icon">ℹ️</div>
+    <div class="info-icon">📋</div>
     <div class="info-text">
-      <strong>Anexos suportados:</strong><br />
-      📈 Anexo G - Mais-Valias e Rendimentos de Capitais<br />
-      🏥 Anexo H - Deduções à Coleta<br />
-      🌍 Anexo J - Rendimentos Estrangeiros
+      <strong>Anexos suportados pela aplicação:</strong>
+      <div class="badges">
+        <span class="badge">📈 Anexo G</span>
+        <span class="badge">🏥 Anexo H</span>
+        <span class="badge">🌍 Anexo J</span>
+      </div>
+      <span class="info-note"
+        >Apenas estes anexos serão processados e exportados</span
+      >
     </div>
   </div>
 </div>

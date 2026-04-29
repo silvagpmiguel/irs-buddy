@@ -1,0 +1,209 @@
+.file-input-area-card {
+  background: white;
+  border: 2px solid var(--border-color);
+  border-radius: 20px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.file-input-area-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--primary-color));
+  transform: scaleX(0);
+  transition: transform 0.4s ease;
+}
+
+.file-input-area-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary-light);
+}
+
+.file-input-area-card.drag-over {
+  border-color: var(--primary-color);
+  background: rgba(15, 59, 44, 0.03);
+  transform: scale(0.98);
+  animation: pulseBorder 0.4s ease-out;
+}
+
+.file-input-area-card.drag-over::before {
+  transform: scaleX(1);
+}
+
+.file-input-area-card.has-file {
+  border-color: var(--primary-color);
+  background: #f8fafc;
+  box-shadow: 0 4px 12px rgba(15, 59, 44, 0.1);
+}
+
+.file-input-area-card.has-file::before {
+  transform: scaleX(1);
+}
+
+.file-input-area-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.file-input-area-card:hover .file-input-area-icon {
+  transform: scale(1.05);
+}
+
+.file-input-area-title {
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+}
+
+.file-input-area-description {
+  font-size: 0.85rem;
+  color: var(--text-gray);
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.file-input-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  margin: 0.5rem 0;
+  width: auto;
+  min-width: 180px;
+}
+
+.file-input-label .file-input-hidden {
+  display: none;
+}
+
+.file-input-label:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(15, 59, 44, 0.3);
+}
+
+.file-input-empty-state {
+  margin-top: 0.75rem;
+}
+
+.upload-placeholder {
+  font-size: 0.8rem;
+  color: var(--text-gray);
+}
+
+.file-input-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  margin-top: 0.75rem;
+}
+
+.file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--primary-color);
+  word-break: break-all;
+}
+
+.file-size {
+  font-size: 0.7rem;
+  color: var(--text-gray);
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--text-gray);
+  transition: all 0.3s ease;
+  padding: 0.5rem 0.75rem;
+  border-radius: 30px;
+}
+
+.btn-icon:hover {
+  color: #dc3545;
+  background: rgba(220, 53, 69, 0.1);
+  transform: scale(1.1);
+}
+
+.file-input-status {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-success {
+  color: #10b981;
+}
+
+.status-error {
+  color: #dc3545;
+}
+
+.file-input-area-card.upload-success {
+  animation: successPulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes successPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(15, 59, 44, 0.4);
+    border-color: var(--primary-color);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(15, 59, 44, 0.1);
+    border-color: var(--primary-color);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(15, 59, 44, 0);
+    border-color: var(--border-color);
+  }
+}
+
+@keyframes pulseBorder {
+  0% {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0 rgba(15, 59, 44, 0.2);
+  }
+  100% {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(15, 59, 44, 0);
+  }
+}
+
+@media (max-width: 768px) {
+  .file-input-area-card {
+    padding: 1.25rem 1rem;
+  }
+  
+  .file-input-area-icon {
+    font-size: 2.5rem;
+  }
+  
+  .file-input-area-title {
+    font-size: 1rem;
+  }
+}

@@ -1,0 +1,37 @@
+<!-- src/components/file-input-area/file-input-area.html -->
+<div class="file-input-area-card" data-type="${type}">
+  <div class="file-input-area-icon">${icon}</div>
+  <h3 class="file-input-area-title">${title}</h3>
+  <p class="file-input-area-description">${description}</p>
+
+  <!-- Input file visível e estilizado como botão -->
+  <label class="file-input-label btn btn-primary">
+    📂 Selecionar Ficheiro
+    <input
+      type="file"
+      accept="${accept}"
+      class="file-input-hidden"
+      data-type="${type}"
+    />
+  </label>
+
+  <div class="file-input-empty-state">
+    <p class="upload-placeholder">ou arraste o ficheiro para esta área</p>
+  </div>
+
+  <div class="file-input-preview" style="display: none">
+    <div class="file-info">
+      <span class="file-name"></span>
+      <span class="file-size"></span>
+    </div>
+    <button
+      type="button"
+      class="btn-icon clear-file-btn"
+      title="Remover ficheiro"
+    >
+      ✕
+    </button>
+  </div>
+
+  <div class="file-input-status"></div>
+</div>

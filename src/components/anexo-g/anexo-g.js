@@ -1,4 +1,3 @@
-// src/components/anexo-g/anexo-g.js
 import { loadTemplate, loadStyles } from "../../js/template-loader.js";
 import { DynamicTable } from "../table/table.js";
 import { CatalogoPaises } from "../../js/constants/catalogs.js";

@@ -1,4 +1,3 @@
-// src/views/home-view/home-view.js
 import { loadTemplate, loadStyles } from "../../js/template-loader.js";
 import { ProgressSteps } from "../../components/progress-steps/progress-steps.js";
 import { XMLUpload } from "../../components/xml-upload/xml-upload.js";

@@ -1,194 +1,311 @@
+/* src/components/xml-upload/xml-upload.css */
+
 .xml-upload .upload-card {
-  height: 100%;
+  background: white;
+  border-radius: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.xml-upload .upload-zone {
-  margin: 1.5rem;
-  border: 2px dashed var(--border-color);
-  border-radius: var(--border-radius-sm);
-  background: var(--bg-light);
-  transition: var(--transition);
-  cursor: pointer;
-  min-height: 280px;
+.xml-upload .upload-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
+}
+
+/* Header */
+.xml-upload .card-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 1.5rem 2rem;
+  border-bottom: 2px solid var(--border-color);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
+  align-items: flex-start;
+  gap: 1rem;
 }
 
-.xml-upload .upload-zone.drag-over {
-  border-color: var(--primary-color);
-  background: rgba(15, 59, 44, 0.05);
-  transform: scale(0.98);
+.xml-upload .card-icon {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
-.xml-upload .file-input-hidden {
-  display: none;
+.xml-upload .header-text {
+  flex: 1;
 }
 
-.xml-upload .upload-content {
-  text-align: center;
-  padding: 2rem;
-}
-
-.xml-upload .upload-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.xml-upload .upload-title {
-  font-size: 1.1rem;
-  font-weight: 500;
+.xml-upload .card-title {
+  font-size: 1.5rem;
   margin-bottom: 0.5rem;
-  color: var(--text-dark);
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.xml-upload .upload-info {
-  font-size: 0.85rem;
+.xml-upload .card-description {
   color: var(--text-gray);
-  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
-.xml-upload .file-preview {
+.xml-upload .link-external {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.xml-upload .link-external:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* Instruções passo-a-passo - estilo horizontal em desktop, vertical em mobile */
+.xml-upload .instructions-steps {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
-  background: var(--bg-white);
-  border-radius: var(--border-radius-sm);
-  margin: 1rem;
-  border: 1px solid var(--border-color);
+  gap: 0.5rem;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, #f8fafc, #ffffff);
+  border-bottom: 1px solid var(--border-color);
 }
 
-.xml-upload .file-info {
+.xml-upload .step-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  background: white;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.xml-upload .step-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.xml-upload .step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  color: white;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.xml-upload .step-content {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.xml-upload .file-name {
-  font-weight: 500;
-  font-size: 0.9rem;
+.xml-upload .step-content strong {
+  font-size: 0.85rem;
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
+.xml-upload .step-detail {
+  font-size: 0.7rem;
+  color: var(--text-gray);
+}
+
+.xml-upload .step-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.xml-upload .step-link strong {
+  color: var(--primary-dark);
+  font-weight: 700;
+  transition: color 0.3s ease;
+}
+
+.xml-upload .step-link:hover strong {
   color: var(--primary-color);
+  text-decoration: underline;
 }
 
-.xml-upload .file-size {
-  font-size: 0.75rem;
-  color: var(--text-gray);
-}
-
-.xml-upload .btn-icon {
-  background: none;
-  border: none;
+.xml-upload .step-arrow {
+  color: var(--primary-light);
   font-size: 1.2rem;
-  cursor: pointer;
-  color: var(--text-gray);
-  transition: var(--transition);
-  padding: 0.25rem 0.5rem;
+  font-weight: 600;
+  flex-shrink: 0;
 }
 
-.xml-upload .btn-icon:hover {
-  color: #dc3545;
+/* Container do FileInputArea */
+.xml-upload #xmlFileInputContainer {
+  padding: 1.5rem 1.5rem;
 }
 
+/* FileInputArea dentro do XML upload - ajustes de tamanho */
+.xml-upload .file-input-area-card {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.xml-upload .file-input-area-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.xml-upload .file-input-area-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.xml-upload .file-input-area-description {
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+/* Info box - centralizada e melhorada */
 .xml-upload .info-box {
-  margin: 1.5rem;
-  padding: 1rem;
+  margin: 0 auto 1.5rem auto;
+  max-width: 80%;
+  padding: 1rem 1.5rem;
   background: #e8f4f0;
-  border-left: 4px solid var(--primary-color);
-  border-radius: var(--border-radius-sm);
+  border-radius: 16px;
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(15, 59, 44, 0.1);
+}
+
+.xml-upload .info-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: rgba(15, 59, 44, 0.2);
 }
 
 .xml-upload .info-icon {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
 }
 
 .xml-upload .info-text {
   font-size: 0.85rem;
   line-height: 1.5;
   color: var(--primary-dark);
+  width: 100%;
 }
 
 .xml-upload .info-text strong {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
-/* Animação de fade-in para o card */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+.xml-upload .badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0.5rem 0;
+}
+
+.xml-upload .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: white;
+  padding: 0.35rem 1rem;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--primary-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.xml-upload .badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  background: var(--primary-color);
+  color: white;
+}
+
+.xml-upload .info-note {
+  font-size: 0.7rem;
+  color: var(--text-gray);
+  display: block;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(15, 59, 44, 0.15);
+}
+
+/* Responsividade */
+@media (max-width: 968px) {
+  .xml-upload .instructions-steps {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 1rem;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  .xml-upload .step-arrow {
+    transform: rotate(90deg);
+    text-align: center;
+    margin: -0.5rem 0;
+  }
+  
+  .xml-upload .step-item {
+    margin: 0;
+  }
+  
+  .xml-upload #xmlFileInputContainer {
+    padding: 1rem;
+  }
+  
+  .xml-upload .file-input-area-card {
+    max-width: 100%;
+  }
+  
+  .xml-upload .info-box {
+    max-width: 90%;
+    margin: 0 auto 1rem auto;
   }
 }
 
-/* Animação de pulso para feedback */
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(15, 59, 44, 0.4);
+@media (max-width: 768px) {
+  .xml-upload .card-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem;
   }
-  70% {
-    box-shadow: 0 0 0 10px rgba(15, 59, 44, 0);
+  
+  .xml-upload .card-title {
+    font-size: 1.25rem;
   }
-  100% {
-    box-shadow: 0 0 0 0 rgba(15, 59, 44, 0);
+  
+  .xml-upload .info-box {
+    max-width: 95%;
+    margin: 0 auto 1rem auto;
+    padding: 0.75rem 1rem;
   }
-}
-
-/* Animação de sucesso */
-@keyframes successCheck {
-  0% {
-    transform: scale(0);
-    opacity: 0;
+  
+  .xml-upload .badges {
+    gap: 0.5rem;
   }
-  50% {
-    transform: scale(1.2);
+  
+  .xml-upload .badge {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.7rem;
   }
-  100% {
-    transform: scale(1);
-    opacity: 1;
+  
+  .xml-upload .info-note {
+    font-size: 0.65rem;
   }
-}
-
-/* Classe para destacar secção */
-.highlight-section {
-  animation: pulse 0.6s ease-out;
-}
-
-/* Loading spinner */
-.loading-spinner {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin-right: 8px;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Efeito de shimmer para loading */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.shimmer {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
 }
