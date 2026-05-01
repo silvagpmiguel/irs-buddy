@@ -1,0 +1,171 @@
+.anexos-section .anexos-card {
+  background: white;
+  border-radius: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-top: 4rem;
+}
+
+.anexos-section .anexos-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
+}
+
+.anexos-section .card-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 1.5rem 2rem;
+  border-bottom: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.anexos-section .card-icon {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.anexos-section .header-text {
+  flex: 1;
+}
+
+.anexos-section .card-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.anexos-section .card-description {
+  color: var(--text-gray);
+  font-size: 0.9rem;
+}
+
+/* Tabs */
+.anexos-section .tabs-container {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem 0 1.5rem;
+  border-bottom: 2px solid var(--border-color);
+  background: white;
+}
+
+.anexos-section .tab-btn {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-gray);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 12px 12px 0 0;
+  position: relative;
+}
+
+.anexos-section .tab-btn:hover {
+  color: var(--primary-color);
+  background: rgba(15, 59, 44, 0.05);
+}
+
+.anexos-section .tab-btn.active {
+  color: var(--primary-color);
+  background: white;
+}
+
+.anexos-section .tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary-color);
+  border-radius: 3px 3px 0 0;
+}
+
+/* Container dos anexos */
+.anexos-section .anexos-container {
+  padding: 1.5rem;
+  min-height: 400px;
+}
+
+/* Botões de ação */
+.anexos-section .action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+  background: white;
+}
+
+.anexos-section #reviewChangesBtn {
+  min-width: 200px;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.anexos-section #reviewChangesBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 59, 44, 0.3);
+}
+
+/* Loading spinner */
+.anexos-section .loading-spinner {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-gray);
+}
+
+.anexos-section .error {
+  text-align: center;
+  padding: 2rem;
+  color: #dc3545;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .anexos-section .card-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem;
+  }
+  
+  .anexos-section .card-title {
+    font-size: 1.25rem;
+  }
+  
+  .anexos-section .tabs-container {
+    flex-wrap: wrap;
+    padding: 0.5rem 1rem 0 1rem;
+  }
+  
+  .anexos-section .tab-btn {
+    flex: 1;
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .anexos-section .anexos-container {
+    padding: 1rem;
+  }
+  
+  .anexos-section .action-buttons {
+    justify-content: stretch;
+    padding: 1rem;
+  }
+  
+  .anexos-section #reviewChangesBtn {
+    width: 100%;
+  }
+}

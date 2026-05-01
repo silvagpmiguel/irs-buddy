@@ -58,10 +58,19 @@ class IRSBuddy {
     const result = parser.parse();
 
     if (result.success) {
+      // Guardar uma cópia PROFUNDA dos dados originais
+      const originalDataCopy = JSON.parse(JSON.stringify(result.data));
       this.data = result.data;
-      this.homeView.setData(this.data, (newData) => {
-        this.data = newData;
-      });
+
+      // Passar também os dados originais para o homeView
+      this.homeView.setData(
+        this.data,
+        (newData) => {
+          this.data = newData;
+        },
+        originalDataCopy,
+      );
+
       this.showSuccess(
         "XML carregado! Agora importe os PDFs dos seus brokers.",
       );
@@ -316,7 +325,7 @@ class IRSBuddy {
     } finally {
       if (exportBtn) {
         exportBtn.disabled = false;
-        exportBtn.textContent = "💾 Exportar XML";
+        exportBtn.textContent = "💾 Exportar  ";
       }
     }
   }

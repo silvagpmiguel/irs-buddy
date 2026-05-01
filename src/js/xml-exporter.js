@@ -415,7 +415,6 @@ export class XMLExporter {
   updateAnexoH(rostoData) {
     const data = this.editedData.anexoH || {};
     const beneficios = data.beneficiosFiscais || [];
-    const declaracaoAlternativa = data.declaracaoAlternativa || "N";
 
     console.log("🔍 updateAnexoH - beneficios.length:", beneficios.length);
 
@@ -484,9 +483,6 @@ export class XMLExporter {
       );
     }
 
-    // ========== PONTO C1 (Declaração Alternativa) ==========
-    this.updateOrCreateElement(quadro06, "AnexoHq06B01", declaracaoAlternativa);
-
     // Garantir que os elementos CT existem
     this.ensureChildElements(quadro06, [
       "AnexoHq06CT01",
@@ -525,19 +521,11 @@ export class XMLExporter {
     const maisValias = data.rendimentosCategoriaG || [];
     const maisValiasB = data.rendimentosCategoriaG_B || [];
     const iban = data.iban;
-
     const hasUserData =
-      rendimentosE.length > 0 ||
-      maisValias.length > 0 ||
-      maisValiasB.length > 0 ||
-      iban?.Iban;
-
-    console.log("🔍 updateAnexoJ - hasUserData:", hasUserData, {
-      rendimentosE: rendimentosE.length,
-      maisValias: maisValias.length,
-      maisValiasB: maisValiasB.length,
-      iban: !!iban?.Iban,
-    });
+      rendimentosE?.length ||
+      maisValias?.length ||
+      maisValiasB?.length ||
+      iban?.length;
 
     let anexoJ = this.xmlDoc.getElementsByTagNameNS(this.namespace, "AnexoJ");
     if (anexoJ.length === 0) {
@@ -570,32 +558,32 @@ export class XMLExporter {
 
     // ========== QUADROS OBRIGATÓRIOS ==========
     // Quadro02 - Ano
-    let quadro02 = this.getOrCreateQuadro(anexo, "Quadro02");
+    const quadro02 = this.getOrCreateQuadro(anexo, "Quadro02");
     this.updateOrCreateElement(quadro02, "AnexoJq02C01", rostoData.ano || "");
 
     // Quadro03 - NIF (dois campos)
-    let quadro03 = this.getOrCreateQuadro(anexo, "Quadro03");
+    const quadro03 = this.getOrCreateQuadro(anexo, "Quadro03");
     this.updateOrCreateElement(quadro03, "AnexoJq03C01", rostoData.nif || "");
     this.updateOrCreateElement(quadro03, "AnexoJq03C03", rostoData.nif || "");
 
     // ========== QUADRO 04 (obrigatório, mesmo vazio) ==========
-    let quadro04 = this.getOrCreateQuadro(anexo, "Quadro04");
+    const quadro04 = this.getOrCreateQuadro(anexo, "Quadro04");
     this.ensureChildElements(quadro04, ["AnexoJq04AT01", "AnexoJq04CT01"]);
 
     // ========== QUADRO 05 (obrigatório, mesmo vazio) ==========
-    let quadro05 = this.getOrCreateQuadro(anexo, "Quadro05");
+    const quadro05 = this.getOrCreateQuadro(anexo, "Quadro05");
     this.ensureChildElements(quadro05, ["AnexoJq05AT01", "AnexoJq05CT01"]);
 
     // ========== QUADRO 06 (obrigatório, mesmo vazio) ==========
-    let quadro06 = this.getOrCreateQuadro(anexo, "Quadro06");
+    const quadro06 = this.getOrCreateQuadro(anexo, "Quadro06");
     this.ensureChildElements(quadro06, ["AnexoJq06AT01", "AnexoJq06BT01"]);
 
     // ========== QUADRO 07 (obrigatório, mesmo vazio) ==========
-    let quadro07 = this.getOrCreateQuadro(anexo, "Quadro07");
+    const quadro07 = this.getOrCreateQuadro(anexo, "Quadro07");
     this.ensureChildElements(quadro07, ["AnexoJq07AT01"]);
 
     // ========== QUADRO 08 - Rendimentos de capitais (ponto 8.A e 8.B) ==========
-    let quadro08 = this.getOrCreateQuadro(anexo, "Quadro08");
+    const quadro08 = this.getOrCreateQuadro(anexo, "Quadro08");
     this.removeTableFromQuadro(quadro08, "AnexoJq08AT01");
     this.removeSomasFromQuadro(quadro08, [
       "AnexoJq08AT01SomaC01",
@@ -666,7 +654,7 @@ export class XMLExporter {
     }
 
     // ========== QUADRO 09 - Mais-valias (pontos 9.2.A, 9.2.B e 9.2.C) ==========
-    let quadro09 = this.getOrCreateQuadro(anexo, "Quadro09");
+    const quadro09 = this.getOrCreateQuadro(anexo, "Quadro09");
 
     // 9.2.A
     this.removeTableFromQuadro(quadro09, "AnexoJq092AT01");
@@ -793,15 +781,24 @@ export class XMLExporter {
     this.updateOrCreateElement(quadro09, "AnexoJq092B01", englobamento);
 
     // ========== QUADRO 10 (obrigatório, mesmo vazio) ==========
-    let quadro10 = this.getOrCreateQuadro(anexo, "Quadro10");
+    const quadro10 = this.getOrCreateQuadro(anexo, "Quadro10");
     this.ensureChildElements(quadro10, ["AnexoJq10AT01", "AnexoJq10BT01"]);
 
     // ========== QUADRO 11 - IBAN ==========
-    let quadro11 = this.getOrCreateQuadro(anexo, "Quadro11");
+    const quadro11 = this.getOrCreateQuadro(anexo, "Quadro11");
     this.removeTableFromQuadro(quadro11, "AnexoJq11T01");
 
-    if (iban?.Iban) {
-      this.updateIban(quadro11, iban);
+    if (iban?.length) {
+      this.updateTableRows(
+        quadro11,
+        "AnexoJq11T01",
+        "AnexoJq11T01-Linha",
+        iban,
+        [
+          { field: "Iban", format: "text" },
+          { field: "Bic", format: "text" },
+        ],
+      );
     }
 
     this.ensureChildElements(quadro11, ["AnexoJq11T02"]);
@@ -905,46 +902,5 @@ export class XMLExporter {
       }
     }
     return false;
-  }
-
-  // ============ MÉTODOS ESPECÍFICOS ============
-
-  updateIban(parentQuadro, ibanData) {
-    const tableName = "AnexoJq11T01";
-    const rowName = "AnexoJq11T01-Linha";
-
-    let table = parentQuadro.getElementsByTagNameNS(this.namespace, tableName);
-    if (table.length === 0) {
-      table = parentQuadro.getElementsByTagName(tableName);
-    }
-
-    let tableElement = null;
-    if (table.length > 0) {
-      tableElement = table[0];
-      const rows = tableElement.getElementsByTagNameNS(this.namespace, rowName);
-      const altRows = tableElement.getElementsByTagName(rowName);
-      const existingRows = rows.length > 0 ? rows : altRows;
-      for (let i = existingRows.length - 1; i >= 0; i--) {
-        existingRows[i].remove();
-      }
-    } else {
-      tableElement = this.xmlDoc.createElementNS(this.namespace, tableName);
-      parentQuadro.appendChild(tableElement);
-    }
-
-    const rowElement = this.xmlDoc.createElementNS(this.namespace, rowName);
-    rowElement.setAttribute("numero", "1");
-
-    const ibanElement = this.xmlDoc.createElementNS(this.namespace, "Iban");
-    ibanElement.textContent = ibanData.Iban;
-    rowElement.appendChild(ibanElement);
-
-    if (ibanData.Bic) {
-      const bicElement = this.xmlDoc.createElementNS(this.namespace, "Bic");
-      bicElement.textContent = ibanData.Bic;
-      rowElement.appendChild(bicElement);
-    }
-
-    tableElement.appendChild(rowElement);
   }
 }

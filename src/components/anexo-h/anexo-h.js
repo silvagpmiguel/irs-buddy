@@ -31,7 +31,6 @@ export class AnexoH {
   applyData() {
     const anexoH = this.data.anexoH || {};
     const isIncluded = anexoH.incluir !== false;
-    const declaracaoAlternativa = anexoH.declaracaoAlternativa || "N";
 
     const toggle = this.element.querySelector("#incluirAnexoH");
     if (toggle) toggle.checked = isIncluded;
@@ -40,15 +39,6 @@ export class AnexoH {
     if (content && !isIncluded) {
       content.classList.add("disabled-section-content");
     }
-
-    const radioSim = this.element.querySelector(
-      'input[name="declaracaoAlternativa"][value="S"]',
-    );
-    const radioNao = this.element.querySelector(
-      'input[name="declaracaoAlternativa"][value="N"]',
-    );
-    if (radioSim && declaracaoAlternativa === "S") radioSim.checked = true;
-    if (radioNao && declaracaoAlternativa === "N") radioNao.checked = true;
   }
 
   initTable() {
@@ -155,25 +145,6 @@ export class AnexoH {
               this.tables.beneficios.setEnabled(false);
           }
         }
-      });
-    }
-
-    const radioSim = this.element.querySelector(
-      'input[name="declaracaoAlternativa"][value="S"]',
-    );
-    const radioNao = this.element.querySelector(
-      'input[name="declaracaoAlternativa"][value="N"]',
-    );
-    if (radioSim) {
-      radioSim.addEventListener("change", (e) => {
-        if (e.target.checked)
-          this.updateData("anexoH.declaracaoAlternativa", "S");
-      });
-    }
-    if (radioNao) {
-      radioNao.addEventListener("change", (e) => {
-        if (e.target.checked)
-          this.updateData("anexoH.declaracaoAlternativa", "N");
       });
     }
   }

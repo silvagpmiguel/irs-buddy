@@ -1,31 +1,95 @@
 import { loadTemplate, loadStyles } from "../../js/template-loader.js";
 import { FileInputArea } from "../file-input-area/file-input-area.js";
 
-export class BrokerImport {
-  constructor(brokersConfig = []) {
-    this.brokersConfig = brokersConfig;
+export class BrokerSection {
+  constructor() {
     this.element = null;
     this.selectedBrokers = new Set();
     this.uploadedFiles = {};
-    this.fileInputAreas = {}; // Inicializado corretamente
-    this.onChangeCallback = null;
+    this.fileInputAreas = {};
+    this.onCompleteCallback = null;
     this.onProcessCallback = null;
-    this.onStepCompleteCallback = null;
+    this.onBackCallback = null;
+    this.brokersConfig = [
+      {
+        id: "xtb",
+        name: "XTB",
+        icon: "📈",
+        description: "Plataforma de investimento internacional",
+        instructions: this.getBrokerInstructions(),
+        requiredFiles: [
+          {
+            type: "capitalGains",
+            label: "Capital Gains",
+            icon: "📊",
+            description: "Mais-valias de ações, ETFs e CFDs",
+          },
+          {
+            type: "investmentIncome",
+            label: "Investment Income",
+            icon: "💰",
+            description: "Dividendos e juros",
+          },
+        ],
+      },
+    ];
+  }
+
+  getBrokerInstructions() {
+    return `
+      <div class="broker-instructions">
+        <div class="instructions-steps">
+          <div class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <a href="https://xstation5.xtb.com/" target="_blank" rel="noopener noreferrer" class="step-link">
+                <strong>Aceda à XTB</strong>
+              </a>
+              <span class="step-detail">Faça login na plataforma X Station 5</span>
+            </div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <strong>Dirija-se à secção "A minha conta"</strong>
+              <span class="step-detail">No menu principal da plataforma</span>
+            </div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <strong>Selecione a opção "Documentos"</strong>
+              <span class="step-detail">Aceda à área de relatórios e documentos</span>
+            </div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step-item">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <strong>Descarregue os documentos fiscais</strong>
+              <span class="step-detail">Capital Gains e Dividends & Interests para o ano em questão</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   async render() {
-    loadStyles("components/broker-import/broker-import");
+    loadStyles("components/broker-section/broker-section");
     const template = await loadTemplate(
-      "components/broker-import/broker-import",
+      "components/broker-section/broker-section",
     );
 
     const container = document.createElement("div");
-    container.className = "broker-import";
+    container.className = "broker-section";
     container.innerHTML = template;
-
     this.element = container;
+
     this.renderBrokersGrid();
-    this.attachGlobalEvents();
+    this.attachEvents();
     return this.element;
   }
 
@@ -39,7 +103,7 @@ export class BrokerImport {
       <label class="broker-card" data-broker="${broker.id}">
         <input type="checkbox" value="${broker.id}" class="broker-checkbox" style="display: none;">
         <div class="broker-card-content">
-          <div class="broker-icon">${broker.icon || "📈"}</div>
+          <div class="broker-icon">${broker.icon}</div>
           <div class="broker-name">${broker.name}</div>
           <div class="broker-description">${broker.description}</div>
           <div class="broker-status">
@@ -62,35 +126,31 @@ export class BrokerImport {
         if (checkbox.checked) {
           this.selectedBrokers.add(brokerId);
           card.classList.add("selected");
-          const statusBadge = card.querySelector(".status-badge");
-          if (statusBadge) {
-            statusBadge.textContent = "Selecionado";
-            statusBadge.classList.remove("pending");
-            statusBadge.classList.add("selected");
-          }
+          this.updateStatusBadge(card, "Selecionado", "selected");
           this.showBrokerUploadSection(brokerId);
         } else {
           this.selectedBrokers.delete(brokerId);
           card.classList.remove("selected");
-          const statusBadge = card.querySelector(".status-badge");
-          if (statusBadge) {
-            statusBadge.textContent = "Por selecionar";
-            statusBadge.classList.remove("selected");
-            statusBadge.classList.add("pending");
-          }
+          this.updateStatusBadge(card, "Por selecionar", "pending");
           this.hideBrokerUploadSection(brokerId);
         }
         this.updateProcessButton();
-        if (this.onChangeCallback) {
-          this.onChangeCallback(this.selectedBrokers, this.uploadedFiles);
-        }
       });
     });
   }
 
+  updateStatusBadge(card, text, className) {
+    const statusBadge = card.querySelector(".status-badge");
+    if (statusBadge) {
+      statusBadge.textContent = text;
+      statusBadge.classList.remove("pending", "selected");
+      statusBadge.classList.add(className);
+    }
+  }
+
   showBrokerUploadSection(brokerId) {
     const broker = this.brokersConfig.find((b) => b.id === brokerId);
-    if (!broker || !broker.requiredFiles) return;
+    if (!broker) return;
 
     const sectionsContainer = this.element.querySelector(
       "#brokerUploadSections",
@@ -108,13 +168,11 @@ export class BrokerImport {
     section = document.createElement("div");
     section.id = `${brokerId}-upload-section`;
     section.className = "broker-upload-section";
-    section.style.display = "block";
     section.innerHTML = `
-    <h3>${broker.name} - Faça upload dos PDFs</h3>
-    ${broker.instructions || ""}
-    <div class="upload-grid" id="${brokerId}-upload-grid"></div>
-  `;
-
+      <h3>${broker.name} - Faça upload dos PDFs</h3>
+      ${broker.instructions}
+      <div class="upload-grid" id="${brokerId}-upload-grid"></div>
+    `;
     sectionsContainer.appendChild(section);
     this.initUploadSection(brokerId);
   }
@@ -126,39 +184,29 @@ export class BrokerImport {
     const broker = this.brokersConfig.find((b) => b.id === brokerId);
     if (!broker) return;
 
-    // Inicializar estrutura de armazenamento se necessário
-    if (!this.fileInputAreas[brokerId]) {
-      this.fileInputAreas[brokerId] = {};
-    }
+    if (!this.fileInputAreas[brokerId]) this.fileInputAreas[brokerId] = {};
 
     for (const fileConfig of broker.requiredFiles) {
       const fileInputArea = new FileInputArea({
         type: fileConfig.type,
         accept: ".pdf",
         title: fileConfig.label,
-        description: fileConfig.description || "",
-        icon: fileConfig.icon || "📄",
+        description: fileConfig.description,
+        icon: fileConfig.icon,
         onFileChange: (file, error) => {
-          if (!this.uploadedFiles[brokerId]) {
-            this.uploadedFiles[brokerId] = {};
-          }
+          if (!this.uploadedFiles[brokerId]) this.uploadedFiles[brokerId] = {};
 
           if (error) {
-            console.error(`Erro no upload de ${fileConfig.label}:`, error);
             delete this.uploadedFiles[brokerId][fileConfig.type];
           } else if (file) {
             this.uploadedFiles[brokerId][fileConfig.type] = file;
           } else {
-            // Ficheiro removido
             delete this.uploadedFiles[brokerId][fileConfig.type];
           }
-
           this.updateProcessButton();
-          if (this.onChangeCallback) {
-            this.onChangeCallback(this.selectedBrokers, this.uploadedFiles);
-          }
         },
       });
+
       const element = await fileInputArea.render();
       element.setAttribute("data-type", fileConfig.type);
       grid.appendChild(element);
@@ -171,36 +219,21 @@ export class BrokerImport {
     if (section) {
       section.style.display = "none";
       delete this.uploadedFiles[brokerId];
-      // Limpar também os componentes FileInputArea
-      if (this.fileInputAreas[brokerId]) {
-        delete this.fileInputAreas[brokerId];
-      }
+      if (this.fileInputAreas[brokerId]) delete this.fileInputAreas[brokerId];
     }
     this.updateProcessButton();
-    if (this.onChangeCallback) {
-      this.onChangeCallback(this.selectedBrokers, this.uploadedFiles);
-    }
   }
 
   updateProcessButton() {
     const processBtn = this.element.querySelector("#processBrokersBtn");
     if (!processBtn) return;
 
-    console.log(
-      "🔍 updateProcessButton - selectedBrokers:",
-      Array.from(this.selectedBrokers),
-    );
-    console.log("🔍 updateProcessButton - uploadedFiles:", this.uploadedFiles);
-
-    // Se não há brokers selecionados, desativar botão
     if (this.selectedBrokers.size === 0) {
-      console.log("🔍 updateProcessButton - no brokers selected, disabling");
       processBtn.disabled = true;
       return;
     }
 
     let allBrokersHaveAtLeastOneFile = true;
-
     for (const brokerId of this.selectedBrokers) {
       const broker = this.brokersConfig.find((b) => b.id === brokerId);
       if (broker && broker.requiredFiles) {
@@ -208,57 +241,29 @@ export class BrokerImport {
         const hasAtLeastOneFile = broker.requiredFiles.some(
           (file) => !!uploaded[file.type],
         );
-
-        console.log(
-          `🔍 updateProcessButton - broker ${brokerId}, hasAtLeastOneFile:`,
-          hasAtLeastOneFile,
-        );
-
         if (!hasAtLeastOneFile) {
           allBrokersHaveAtLeastOneFile = false;
           break;
         }
       }
     }
-
-    console.log(
-      "🔍 updateProcessButton - allBrokersHaveAtLeastOneFile:",
-      allBrokersHaveAtLeastOneFile,
-    );
     processBtn.disabled = !allBrokersHaveAtLeastOneFile;
   }
 
-  attachGlobalEvents() {
+  attachEvents() {
     const processBtn = this.element.querySelector("#processBrokersBtn");
     if (processBtn) {
       processBtn.addEventListener("click", async () => {
         if (this.onProcessCallback) {
-          const btn = processBtn;
-          const btnText = btn.querySelector(".btn-text");
-          const btnLoader = btn.querySelector(".btn-loader");
-
-          btn.disabled = true;
-          btnText.style.display = "none";
-          btnLoader.style.display = "inline";
-          btn.classList.add("processing");
-
-          try {
-            await this.onProcessCallback(this.uploadedFiles);
-
-            if (this.onStepCompleteCallback) {
-              this.onStepCompleteCallback(3);
-            }
-          } catch (error) {
-            console.error("Process error:", error);
-            this.showProcessError();
-          } finally {
-            btn.disabled = false;
-            btnText.style.display = "inline";
-            btnLoader.style.display = "none";
-            btn.classList.remove("processing");
-          }
+          await this.onProcessCallback(this.uploadedFiles);
+          if (this.onCompleteCallback) this.onCompleteCallback();
         }
       });
+    }
+    // Botão Voltar ao passo 1
+    const backBtn = this.element.querySelector("#backToStep1Btn");
+    if (backBtn && this.onBackCallback) {
+      backBtn.addEventListener("click", () => this.onBackCallback());
     }
   }
 
@@ -266,36 +271,16 @@ export class BrokerImport {
     return this.uploadedFiles;
   }
 
-  getSelectedBrokers() {
-    return this.selectedBrokers;
-  }
-
-  setOnChange(callback) {
-    this.onChangeCallback = callback;
-  }
-
   setOnProcess(callback) {
     this.onProcessCallback = callback;
   }
 
-  setOnStepComplete(callback) {
-    this.onStepCompleteCallback = callback;
+  setOnComplete(callback) {
+    this.onCompleteCallback = callback;
   }
 
-  showProcessError() {
-    const errorMsg = document.createElement("div");
-    errorMsg.className = "process-success";
-    errorMsg.style.background = "linear-gradient(135deg, #dc3545, #b02a37)";
-    errorMsg.innerHTML = `
-      <i>❌</i>
-      <span>Erro ao processar os PDFs. Verifique os ficheiros e tente novamente.</span>
-    `;
-    document.body.appendChild(errorMsg);
-
-    setTimeout(() => {
-      errorMsg.style.animation = "slideOutRight 0.3s ease";
-      setTimeout(() => errorMsg.remove(), 300);
-    }, 3000);
+  setOnBack(callback) {
+    this.onBackCallback = callback;
   }
 
   reset() {
@@ -309,12 +294,7 @@ export class BrokerImport {
     const cards = this.element.querySelectorAll(".broker-card");
     cards.forEach((card) => {
       card.classList.remove("selected");
-      const statusBadge = card.querySelector(".status-badge");
-      if (statusBadge) {
-        statusBadge.textContent = "Por selecionar";
-        statusBadge.classList.remove("selected");
-        statusBadge.classList.add("pending");
-      }
+      this.updateStatusBadge(card, "Por selecionar", "pending");
     });
 
     const sections = this.element.querySelectorAll(".broker-upload-section");

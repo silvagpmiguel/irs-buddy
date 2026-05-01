@@ -1,0 +1,223 @@
+.ending-section .ending-card {
+  background: white;
+  border-radius: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  margin-top: 2rem;
+}
+
+.ending-section .card-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 1.5rem 2rem;
+  border-bottom: 2px solid var(--border-color);
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.ending-section .card-icon {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.ending-section .header-text {
+  flex: 1;
+}
+
+.ending-section .card-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ending-section .card-description {
+  color: var(--text-gray);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Instruções do passo final */
+.ending-section .instructions-steps-ending {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f8fafc, #ffffff);
+  flex-wrap: wrap;
+}
+
+.ending-section .step-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  background: white;
+  padding: 1rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.ending-section .step-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.ending-section .step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  color: white;
+  border-radius: 50%;
+  font-size: 1rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.ending-section .step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.ending-section .step-content strong {
+  font-size: 0.9rem;
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
+.ending-section .step-detail {
+  font-size: 0.7rem;
+  color: var(--text-gray);
+}
+
+.ending-section .step-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.ending-section .step-link strong {
+  transition: color 0.3s ease;
+}
+
+.ending-section .step-link:hover strong {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.ending-section .step-arrow {
+  color: var(--primary-light);
+  font-size: 1.2rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* Tips box */
+.ending-section .tips-box {
+  margin: 0 2rem 1.5rem 2rem;
+  padding: 1rem 1.25rem;
+  background: #e8f4f0;
+  border-radius: 16px;
+  display: flex;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.ending-section .tips-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.ending-section .tips-icon {
+  font-size: 1.5rem;
+}
+
+.ending-section .tips-content {
+  flex: 1;
+}
+
+.ending-section .tips-content strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--primary-dark);
+}
+
+.ending-section .tips-content ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.ending-section .tips-content li {
+  font-size: 0.8rem;
+  color: var(--text-gray);
+  margin-bottom: 0.25rem;
+}
+
+/* Botões do passo final */
+.ending-section .action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1rem 2rem 1.5rem 2rem;
+  border-top: 1px solid var(--border-color);
+  background: white;
+}
+
+/* Responsividade */
+@media (max-width: 968px) {
+  .ending-section .instructions-steps-ending {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+  
+  .ending-section .step-arrow {
+    transform: rotate(90deg);
+    text-align: center;
+    margin: -0.5rem 0;
+  }
+  
+  .ending-section .step-item {
+    margin: 0;
+  }
+  
+  .ending-section .tips-box {
+    margin: 0 1rem 1rem 1rem;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .ending-section .tips-content ul {
+    text-align: left;
+  }
+  
+  .ending-section .action-buttons {
+    flex-direction: column;
+    padding: 1rem;
+  }
+  
+  .ending-section .action-buttons .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .ending-section .card-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem;
+  }
+  
+  .ending-section .card-title {
+    font-size: 1.25rem;
+  }
+}

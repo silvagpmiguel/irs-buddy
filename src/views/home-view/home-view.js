@@ -1,31 +1,34 @@
 import { loadTemplate, loadStyles } from "../../js/template-loader.js";
 import { ProgressSteps } from "../../components/progress-steps/progress-steps.js";
-import { XMLUpload } from "../../components/xml-upload/xml-upload.js";
-import { BrokerImport } from "../../components/broker-import/broker-import.js";
-import { AnexoG } from "../../components/anexo-g/anexo-g.js";
-import { AnexoH } from "../../components/anexo-h/anexo-h.js";
-import { AnexoJ } from "../../components/anexo-j/anexo-j.js";
+import { ATImportSection } from "../../components/at-import-section/at-import-section.js";
+import { BrokerSection } from "../../components/broker-section/broker-section.js";
+import { AnexosSection } from "../../components/anexos-section/anexos-section.js";
+import { SummarySection } from "../../components/summary-section/summary-section.js";
+import { EndingSection } from "../../components/ending-section/ending-section.js";
 
 export class HomeView {
   constructor() {
     this.element = null;
     this.progressSteps = null;
-    this.xmlUpload = null;
-    this.brokerImport = null;
+    this.currentStep = 1;
+
+    // Secções
+    this.atImportSection = null;
+    this.brokerSection = null;
+    this.anexosSection = null;
+    this.summarySection = null;
+    this.endingSection = null;
+
+    // Dados
     this.data = null;
-    this.onDataChange = null;
-    this.currentTab = "anexoG";
+    this.originalXmlString = null;
+    this.originalParsedData = null;
 
-    // Cache de componentes (apenas os que já foram ativados)
-    this.anexoComponents = {
-      anexoG: null,
-      anexoH: null,
-      anexoJ: null,
-    };
-
+    // Callbacks externos
     this.onFileUploadCallback = null;
     this.onBrokerProcessCallback = null;
     this.onExportCallback = null;
+    this.onDataChangeCallback = null;
   }
 
   async render() {
@@ -36,15 +39,13 @@ export class HomeView {
     container.id = "homeView";
     container.className = "view active";
     container.innerHTML = template;
-
     this.element = container;
-    await this.initComponents();
-    this.attachEvents();
 
+    await this.initSections();
     return this.element;
   }
 
-  async initComponents() {
+  async initSections() {
     // Progress Steps
     this.progressSteps = new ProgressSteps();
     const progressElement = await this.progressSteps.render();
@@ -52,307 +53,182 @@ export class HomeView {
       .querySelector("#progressStepsContainer")
       .appendChild(progressElement);
 
-    // XML Upload
-    this.xmlUpload = new XMLUpload();
-    const xmlElement = await this.xmlUpload.render();
-    this.element.querySelector("#xmlUploadContainer").appendChild(xmlElement);
+    // Secção 1: Importação da AT
+    await this.renderATImportSection();
 
-    this.xmlUpload.setOnUpload((file, error) => {
-      if (error) {
-        console.error(error);
-      } else if (file) {
-        this.goToStep(2);
-        if (this.onFileUploadCallback) this.onFileUploadCallback(file);
-      }
+    // Secção 2: Brokers
+    await this.renderBrokerSection();
+  }
+
+  async renderATImportSection() {
+    const container = this.element.querySelector("#step1Container");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    this.atImportSection = new ATImportSection();
+    this.atImportSection.setOnComplete((file) => {
+      if (this.onFileUploadCallback) this.onFileUploadCallback(file);
+      this.goToStep(2);
     });
 
-    // Broker Import
-    this.brokerImport = new BrokerImport([
-      {
-        id: "xtb",
-        name: "XTB",
-        icon: "📈",
-        description: "Plataforma de investimento internacional",
-        instructions: `
-      <div class="broker-instructions">
-        <div class="instructions-steps">
-          <div class="step-item">
-            <div class="step-number">1</div>
-            <div class="step-content">
-              <a href="https://xstation5.xtb.com/" target="_blank" rel="noopener noreferrer" class="step-link">
-                <strong>Aceda à XTB</strong>
-              </a>
-              <span class="step-detail">Faça login na plataforma X Station 5</span>
-            </div>
-          </div>
-          <div class="step-arrow">→</div>
-          <div class="step-item">
-            <div class="step-number">2</div>
-            <div class="step-content">
-              <strong>Dirija-se à secção "A minha conta"</strong>
-              <span class="step-detail">No menu principal da plataforma</span>
-            </div>
-          </div>
-          <div class="step-arrow">→</div>
-          <div class="step-item">
-            <div class="step-number">3</div>
-            <div class="step-content">
-              <strong>Selecione a opção "Documentos"</strong>
-              <span class="step-detail">Aceda à área de relatórios e documentos</span>
-            </div>
-          </div>
-          <div class="step-arrow">→</div>
-          <div class="step-item">
-            <div class="step-number">4</div>
-            <div class="step-content">
-              <strong>Descarregue os documentos fiscais</strong>
-              <span class="step-detail">Capital Gains e Dividends & Interests para o ano em questão</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    `,
-        requiredFiles: [
-          {
-            type: "capitalGains",
-            label: "Capital Gains",
-            icon: "📊",
-            description: "Mais-valias de ações, ETFs e CFDs",
-          },
-          {
-            type: "investmentIncome",
-            label: "Investment Income",
-            icon: "💰",
-            description: "Dividendos e juros",
-          },
-        ],
-      },
-    ]);
-    const brokerElement = await this.brokerImport.render();
-    this.element
-      .querySelector("#brokerImportContainer")
-      .appendChild(brokerElement);
+    const element = await this.atImportSection.render();
+    container.appendChild(element);
+  }
 
-    this.brokerImport.setOnProcess(async (files) => {
+  async renderBrokerSection() {
+    const container = this.element.querySelector("#step2Container");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    this.brokerSection = new BrokerSection();
+
+    this.brokerSection.setOnProcess(async (files) => {
       if (this.onBrokerProcessCallback) {
         await this.onBrokerProcessCallback(files);
-        this.goToStep(3);
-        // Ao entrar no passo 3, inicializar a tab ativa
-        setTimeout(() => this.renderActiveTab(), 100);
       }
     });
+
+    this.brokerSection.setOnComplete(() => {
+      this.goToStep(3);
+    });
+
+    this.brokerSection.setOnBack(() => {
+      this.goToStep(1);
+    });
+
+    const element = await this.brokerSection.render();
+    container.appendChild(element);
   }
 
-  async getOrCreateAnexoComponent(anexoId, forceCreate = false) {
-    // Se já existe em cache e não for force create, retornar
-    if (!forceCreate && this.anexoComponents[anexoId]) {
-      return this.anexoComponents[anexoId];
-    }
+  async renderAnexosSection() {
+    const container = this.element.querySelector("#step3Container");
+    if (!container) return;
 
-    // Se forceCreate=true e já existe, recriar?
-    if (forceCreate && this.anexoComponents[anexoId]) {
-      // Não recriar, apenas retornar o existente
-      // (os dados já estão lá, não precisamos recriar)
-      return this.anexoComponents[anexoId];
-    }
+    container.innerHTML = "";
 
-    // Criar novo componente
-    let AnexoClass;
-    switch (anexoId) {
-      case "anexoG":
-        AnexoClass = AnexoG;
-        break;
-      case "anexoH":
-        AnexoClass = AnexoH;
-        break;
-      case "anexoJ":
-        AnexoClass = AnexoJ;
-        break;
-      default:
-        return null;
-    }
-
-    const anexoComponent = new AnexoClass(this.data || {}, (newData) => {
+    this.anexosSection = new AnexosSection(this.data, (newData) => {
       this.data = newData;
-      if (this.onDataChange) this.onDataChange(this.data);
+      if (this.onDataChangeCallback) this.onDataChangeCallback(this.data);
     });
 
-    // Renderizar o componente
-    const element = await anexoComponent.render();
-    anexoComponent.element = element;
+    this.anexosSection.setOnReview(() => this.goToStep(4));
+    this.anexosSection.setOnBack(() => this.goToStep(2));
 
-    this.anexoComponents[anexoId] = anexoComponent;
-    return anexoComponent;
+    const element = await this.anexosSection.render();
+    container.appendChild(element);
   }
 
-  async renderActiveTab() {
-    const tabContent = this.element.querySelector("#tabContent");
-    if (!tabContent) return;
+  async renderSummarySection() {
+    const container = this.element.querySelector("#step4Container");
+    if (!container) return;
 
-    if (this.isRendering) return;
-    this.isRendering = true;
+    container.innerHTML = "";
 
-    tabContent.innerHTML = '<div class="loading-spinner">Carregando...</div>';
+    this.summarySection = new SummarySection(
+      this.originalXmlString,
+      this.data,
+      this.originalParsedData,
+    );
 
-    try {
-      // Obter ou criar o componente do anexo (as tabelas serão inicializadas aqui)
-      const anexoComponent = await this.getOrCreateAnexoComponent(
-        this.currentTab,
-      );
-
-      if (anexoComponent && anexoComponent.element) {
-        tabContent.innerHTML = "";
-        tabContent.appendChild(anexoComponent.element);
-        this.currentAnexoComponent = anexoComponent;
-        console.log(`Tab ${this.currentTab} rendered successfully`);
-      } else {
-        throw new Error("Componente não retornou elemento válido");
+    this.summarySection.setOnBack(() => this.goToStep(3));
+    this.summarySection.setOnConfirm(() => {
+      if (this.onExportCallback) {
+        this.onExportCallback();
       }
-    } catch (error) {
-      console.error("Error rendering anexo:", error);
-      tabContent.innerHTML =
-        '<div class="error">Erro ao carregar o anexo</div>';
-    }
+      this.goToStep(5);
+    });
 
-    this.isRendering = false;
+    const element = await this.summarySection.render();
+    container.appendChild(element);
   }
 
-  async getAllTableReferences() {
-    const references = {};
+  async renderEndingSection() {
+    const container = this.element.querySelector("#step5Container");
+    if (!container) return;
 
-    // Garantir que todos os anexos estão inicializados (reutilizando o método existente)
-    const anexosToInitialize = ["anexoG", "anexoH", "anexoJ"];
+    container.innerHTML = "";
 
-    for (const anexoId of anexosToInitialize) {
-      await this.getOrCreateAnexoComponent(anexoId, true);
-    }
+    this.endingSection = new EndingSection();
 
-    // CORREÇÃO: Usar this.anexoComponents em vez de this.anexoGComponent, etc.
-    const anexoGComp = this.anexoComponents.anexoG;
-    const anexoHComp = this.anexoComponents.anexoH;
-    const anexoJComp = this.anexoComponents.anexoJ;
-
-    // Anexo G
-    if (anexoGComp?.tables?.anexoG) {
-      references.maisValiasGTable = anexoGComp.tables.anexoG;
-      console.log("✅ Referência do Anexo G obtida");
-    } else {
-      console.warn("⚠️ Anexo G não tem tabela anexoG", anexoGComp?.tables);
-    }
-
-    // Anexo H
-    if (anexoHComp?.tables?.beneficios) {
-      references.beneficiosTable = anexoHComp.tables.beneficios;
-      console.log("✅ Referência do Anexo H obtida");
-    } else {
-      console.warn("⚠️ Anexo H não tem tabela beneficios", anexoHComp?.tables);
-    }
-
-    // Anexo J
-    if (anexoJComp?.tables) {
-      references.rendimentosJurosTable = anexoJComp.tables.rendimentosJuros;
-      references.maisValiasJTable = anexoJComp.tables.maisValiasJ;
-      references.maisValiasJBTable = anexoJComp.tables.maisValiasJB;
-      console.log("✅ Referências do Anexo J obtidas", {
-        rendimentosJurosTable: !!references.rendimentosJurosTable,
-        maisValiasJTable: !!references.maisValiasJTable,
-        maisValiasJBTable: !!references.maisValiasJBTable,
-      });
-    } else {
-      console.warn("⚠️ Anexo J não tem tables", anexoJComp);
-    }
-
-    return references;
-  }
-
-  switchTab(tabId) {
-    if (this.currentTab === tabId) return;
-    this.currentTab = tabId;
-
-    const tabs = this.element.querySelectorAll(".tab-btn");
-    tabs.forEach((btn) => {
-      btn.classList.remove("active");
-      if (btn.getAttribute("data-tab") === tabId) {
-        btn.classList.add("active");
+    this.endingSection.setOnBack(() => this.goToStep(4));
+    this.endingSection.setOnDownloadAgain(() => {
+      if (this.onExportCallback) {
+        this.onExportCallback();
       }
     });
 
-    this.renderActiveTab();
+    const element = await this.endingSection.render();
+    container.appendChild(element);
   }
 
   goToStep(step) {
+    this.currentStep = step;
+
     const step1 = this.element.querySelector("#step1Container");
     const step2 = this.element.querySelector("#step2Container");
     const step3 = this.element.querySelector("#step3Container");
+    const step4 = this.element.querySelector("#step4Container");
+    const step5 = this.element.querySelector("#step5Container");
 
-    if (step1) step1.style.display = "none";
-    if (step2) step2.style.display = "none";
-    if (step3) step3.style.display = "none";
+    if (step1) step1.style.display = step === 1 ? "block" : "none";
+    if (step2) step2.style.display = step === 2 ? "block" : "none";
+    if (step3) step3.style.display = step === 3 ? "block" : "none";
+    if (step4) step4.style.display = step === 4 ? "block" : "none";
+    if (step5) step5.style.display = step === 5 ? "block" : "none";
 
-    if (step === 1 && step1) step1.style.display = "block";
-    if (step === 2 && step2) step2.style.display = "block";
-    if (step === 3 && step3) step3.style.display = "block";
+    this.updateProgressSteps(step);
 
-    if (this.progressSteps) {
-      if (step === 1) {
-        this.progressSteps.reset();
-      } else if (step === 2) {
-        this.progressSteps.completeStep(1);
-        this.progressSteps.setCurrentStep(2);
-      } else if (step === 3) {
-        this.progressSteps.completeStep(2);
-        this.progressSteps.setCurrentStep(3);
-        // Apenas mostrar a tab ativa se já tiver dados
-        if (this.data) {
-          setTimeout(() => this.renderActiveTab(), 50);
-        }
-      }
+    if (step === 3) this.renderAnexosSection();
+    if (step === 4) this.renderSummarySection();
+    if (step === 5) this.renderEndingSection();
+  }
+
+  updateProgressSteps(step) {
+    if (!this.progressSteps) return;
+
+    if (step === 1) {
+      this.progressSteps.reset();
+    } else if (step === 2) {
+      this.progressSteps.completeStep(1);
+      this.progressSteps.setCurrentStep(2);
+    } else if (step === 3) {
+      this.progressSteps.completeStep(2);
+      this.progressSteps.setCurrentStep(3);
+    } else if (step === 4) {
+      this.progressSteps.completeStep(3);
+      this.progressSteps.setCurrentStep(4);
+    } else if (step === 5) {
+      this.progressSteps.completeStep(4);
+      this.progressSteps.setCurrentStep(5);
     }
   }
 
-  setData(data, onDataChange) {
+  // ============ MÉTODOS PÚBLICOS ============
+
+  setData(data, onDataChange, originalParsedData) {
     this.data = data;
-    this.onDataChange = onDataChange;
+    this.onDataChangeCallback = onDataChange;
+    this.originalParsedData = originalParsedData;
 
-    // Atualizar dados em todos os componentes em cache (se existirem)
-    Object.values(this.anexoComponents).forEach((component) => {
-      if (component && component.data) {
-        component.data = data;
-        // Se a tabela já existe, recarregar os dados
-        if (component.tables) {
-          // Recarregar cada tabela
-          Object.values(component.tables).forEach((table) => {
-            if (table && table.setData) {
-              // Não recarregar para evitar loops, apenas atualizar referência
-            }
-          });
-        }
-      }
-    });
-
-    // Se já estiver no passo 3, recarregar a tab ativa
-    const step3 = this.element?.querySelector("#step3Container");
-    if (step3 && step3.style.display !== "none") {
-      this.renderActiveTab();
+    if (this.anexosSection) {
+      this.anexosSection.setData(data, onDataChange);
     }
   }
 
-  attachEvents() {
-    const tabs = this.element.querySelectorAll(".tab-btn");
-    tabs.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const tabId = btn.getAttribute("data-tab");
-        this.switchTab(tabId);
-      });
-    });
-
-    const exportBtn = this.element.querySelector("#exportXMLBtn");
-    if (exportBtn) {
-      exportBtn.addEventListener("click", () => {
-        if (this.onExportCallback) this.onExportCallback();
-      });
-    }
+  setOriginalXmlString(xmlString) {
+    this.originalXmlString = xmlString;
   }
+
+  async getAllTableReferences() {
+    if (this.anexosSection) {
+      return await this.anexosSection.getAllTableReferences();
+    }
+    return {};
+  }
+
+  // ============ SETTERS PARA CALLBACKS ============
 
   setOnFileUpload(callback) {
     this.onFileUploadCallback = callback;
@@ -366,6 +242,12 @@ export class HomeView {
     this.onExportCallback = callback;
   }
 
+  setOnDataChange(callback) {
+    this.onDataChangeCallback = callback;
+  }
+
+  // ============ MÉTODOS DE UTILIDADE ============
+
   show() {
     if (this.element) this.element.style.display = "block";
   }
@@ -376,13 +258,9 @@ export class HomeView {
 
   reset() {
     this.goToStep(1);
-    if (this.xmlUpload) this.xmlUpload.clearFile();
-    if (this.brokerImport) this.brokerImport.reset();
-    // Limpar cache dos anexos para recomeçar
-    this.anexoComponents = {
-      anexoG: null,
-      anexoH: null,
-      anexoJ: null,
-    };
+    if (this.brokerSection) this.brokerSection.reset();
+    this.data = null;
+    this.originalXmlString = null;
+    this.originalParsedData = null;
   }
 }

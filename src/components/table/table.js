@@ -542,8 +542,7 @@ export class DynamicTable {
         }
         if (!isNaN(rowIdx) && this.data[rowIdx]) {
           this.data[rowIdx][field] = value;
-          this.updateFooterValues();
-          this.updateFooterDisplay();
+          this.updateFooter();
           this.onChange(this.data);
         }
       } else if (target.classList.contains("at-table-checkbox")) {
@@ -552,8 +551,7 @@ export class DynamicTable {
         const value = target.checked ? "S" : "N";
         if (!isNaN(rowIdx) && this.data[rowIdx]) {
           this.data[rowIdx][field] = value;
-          this.updateFooterValues();
-          this.updateFooterDisplay();
+          this.updateFooter();
           this.onChange(this.data);
         }
       }

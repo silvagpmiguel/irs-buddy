@@ -1,20 +1,19 @@
-/* src/components/xml-upload/xml-upload.css */
-
-.xml-upload .upload-card {
+.at-import-section .at-import-card {
   background: white;
   border-radius: 32px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-top: 2rem;
 }
 
-.xml-upload .upload-card:hover {
+.at-import-section .at-import-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
 }
 
 /* Header */
-.xml-upload .card-header {
+.at-import-section .card-header {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   padding: 1.5rem 2rem;
   border-bottom: 2px solid var(--border-color);
@@ -23,16 +22,16 @@
   gap: 1rem;
 }
 
-.xml-upload .card-icon {
+.at-import-section .card-icon {
   font-size: 2.5rem;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
-.xml-upload .header-text {
+.at-import-section .header-text {
   flex: 1;
 }
 
-.xml-upload .card-title {
+.at-import-section .card-title {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
   background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
@@ -41,26 +40,26 @@
   -webkit-text-fill-color: transparent;
 }
 
-.xml-upload .card-description {
+.at-import-section .card-description {
   color: var(--text-gray);
   font-size: 0.9rem;
   line-height: 1.5;
 }
 
-.xml-upload .link-external {
+.at-import-section .link-external {
   color: var(--primary-color);
   text-decoration: none;
   font-weight: 600;
   transition: all 0.3s ease;
 }
 
-.xml-upload .link-external:hover {
+.at-import-section .link-external:hover {
   color: var(--primary-dark);
   text-decoration: underline;
 }
 
-/* Instruções passo-a-passo - estilo horizontal em desktop, vertical em mobile */
-.xml-upload .instructions-steps {
+/* Instruções passo-a-passo */
+.at-import-section .instructions-steps {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -70,7 +69,7 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-.xml-upload .step-item {
+.at-import-section .step-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -82,12 +81,12 @@
   transition: all 0.3s ease;
 }
 
-.xml-upload .step-item:hover {
+.at-import-section .step-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.xml-upload .step-number {
+.at-import-section .step-number {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -101,40 +100,40 @@
   flex-shrink: 0;
 }
 
-.xml-upload .step-content {
+.at-import-section .step-content {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.xml-upload .step-content strong {
+.at-import-section .step-content strong {
   font-size: 0.85rem;
   color: var(--primary-dark);
   font-weight: 700;
 }
 
-.xml-upload .step-detail {
+.at-import-section .step-detail {
   font-size: 0.7rem;
   color: var(--text-gray);
 }
 
-.xml-upload .step-link {
+.at-import-section .step-link {
   text-decoration: none;
   color: inherit;
 }
 
-.xml-upload .step-link strong {
+.at-import-section .step-link strong {
   color: var(--primary-dark);
   font-weight: 700;
   transition: color 0.3s ease;
 }
 
-.xml-upload .step-link:hover strong {
+.at-import-section .step-link:hover strong {
   color: var(--primary-color);
   text-decoration: underline;
 }
 
-.xml-upload .step-arrow {
+.at-import-section .step-arrow {
   color: var(--primary-light);
   font-size: 1.2rem;
   font-weight: 600;
@@ -142,34 +141,35 @@
 }
 
 /* Container do FileInputArea */
-.xml-upload #xmlFileInputContainer {
-  padding: 1.5rem 1.5rem;
+.at-import-section #atFileInputContainer {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
-/* FileInputArea dentro do XML upload - ajustes de tamanho */
-.xml-upload .file-input-area-card {
+/* FileInputArea dentro do AT import */
+.at-import-section .file-input-area-card {
   max-width: 500px;
   margin: 0 auto;
   padding: 1.5rem;
 }
 
-.xml-upload .file-input-area-icon {
+.at-import-section .file-input-area-icon {
   font-size: 2.5rem;
   margin-bottom: 0.75rem;
 }
 
-.xml-upload .file-input-area-title {
+.at-import-section .file-input-area-title {
   font-size: 1.1rem;
   margin-bottom: 0.25rem;
 }
 
-.xml-upload .file-input-area-description {
+.at-import-section .file-input-area-description {
   font-size: 0.8rem;
   margin-bottom: 1rem;
 }
 
-/* Info box - centralizada e melhorada */
-.xml-upload .info-box {
+/* Info box */
+.at-import-section .info-box {
   margin: 0 auto 1.5rem auto;
   max-width: 80%;
   padding: 1rem 1.5rem;
@@ -184,31 +184,31 @@
   border: 1px solid rgba(15, 59, 44, 0.1);
 }
 
-.xml-upload .info-box:hover {
+.at-import-section .info-box:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border-color: rgba(15, 59, 44, 0.2);
 }
 
-.xml-upload .info-icon {
+.at-import-section .info-icon {
   font-size: 1.5rem;
 }
 
-.xml-upload .info-text {
+.at-import-section .info-text {
   font-size: 0.85rem;
   line-height: 1.5;
   color: var(--primary-dark);
   width: 100%;
 }
 
-.xml-upload .info-text strong {
+.at-import-section .info-text strong {
   display: block;
   margin-bottom: 0.75rem;
   font-size: 0.9rem;
   font-weight: 700;
 }
 
-.xml-upload .badges {
+.at-import-section .badges {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -216,7 +216,7 @@
   margin: 0.5rem 0;
 }
 
-.xml-upload .badge {
+.at-import-section .badge {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -230,14 +230,14 @@
   transition: all 0.3s ease;
 }
 
-.xml-upload .badge:hover {
+.at-import-section .badge:hover {
   transform: translateY(-2px);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   background: var(--primary-color);
   color: white;
 }
 
-.xml-upload .info-note {
+.at-import-section .info-note {
   font-size: 0.7rem;
   color: var(--text-gray);
   display: block;
@@ -248,64 +248,64 @@
 
 /* Responsividade */
 @media (max-width: 968px) {
-  .xml-upload .instructions-steps {
+  .at-import-section .instructions-steps {
     flex-direction: column;
     align-items: stretch;
     gap: 0.75rem;
     padding: 1rem;
   }
   
-  .xml-upload .step-arrow {
+  .at-import-section .step-arrow {
     transform: rotate(90deg);
     text-align: center;
     margin: -0.5rem 0;
   }
   
-  .xml-upload .step-item {
+  .at-import-section .step-item {
     margin: 0;
   }
   
-  .xml-upload #xmlFileInputContainer {
+  .at-import-section #atFileInputContainer {
     padding: 1rem;
   }
   
-  .xml-upload .file-input-area-card {
+  .at-import-section .file-input-area-card {
     max-width: 100%;
   }
   
-  .xml-upload .info-box {
+  .at-import-section .info-box {
     max-width: 90%;
     margin: 0 auto 1rem auto;
   }
 }
 
 @media (max-width: 768px) {
-  .xml-upload .card-header {
+  .at-import-section .card-header {
     flex-direction: column;
     text-align: center;
     padding: 1rem;
   }
   
-  .xml-upload .card-title {
+  .at-import-section .card-title {
     font-size: 1.25rem;
   }
   
-  .xml-upload .info-box {
+  .at-import-section .info-box {
     max-width: 95%;
     margin: 0 auto 1rem auto;
     padding: 0.75rem 1rem;
   }
   
-  .xml-upload .badges {
+  .at-import-section .badges {
     gap: 0.5rem;
   }
   
-  .xml-upload .badge {
+  .at-import-section .badge {
     padding: 0.25rem 0.75rem;
     font-size: 0.7rem;
   }
   
-  .xml-upload .info-note {
+  .at-import-section .info-note {
     font-size: 0.65rem;
   }
 }
