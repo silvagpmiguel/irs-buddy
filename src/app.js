@@ -1,6 +1,8 @@
 import { HomeView } from "./views/home-view/home-view.js";
-import { XMLParser } from "./js/xml-parser.js";
+import { XMLParser } from "./js/parsers/xml-parser.js";
 import { XMLExporter } from "./js/xml-exporter.js";
+import { Trading212Parser } from "./js/parsers/trading212-parser.js";
+import { XTBParser } from "./js/parsers/xtb-parser.js";
 
 class IRSBuddy {
   constructor() {
@@ -81,119 +83,109 @@ class IRSBuddy {
 
   async processBrokerFiles(files) {
     this.showSuccess("A processar PDFs...");
-
     try {
-      const { PDFParser } = await import("./js/pdf-parser.js");
-      this.pdfParser = new PDFParser();
-
       let totalRows92A = 0;
       let totalRows92B = 0;
       let totalRows8A = 0;
-
       for (const [brokerId, brokerFiles] of Object.entries(files)) {
-        if (brokerId === "xtb") {
-          // Processar Capital Gains PDF (mais-valias)
-          if (brokerFiles.capitalGains) {
-            console.log("Processando Capital Gains PDF...");
-            const { rows92A, rows92B } = await this.pdfParser.parseCapitalGains(
-              brokerFiles.capitalGains,
-            );
-
-            console.log(
-              `Encontradas ${rows92A.length} linhas para a tabela 9.2A`,
-            );
-            console.log(
-              `Encontradas ${rows92B.length} linhas para a tabela 9.2B`,
-            );
-
-            totalRows92A = rows92A.length;
-            totalRows92B = rows92B.length;
-
-            // Adicionar ao Anexo J - 9.2A
-            if (rows92A.length > 0) {
-              this.addMaisValiasData(rows92A);
+        switch (brokerId) {
+          case "xtb": {
+            const parser = new XTBParser();
+            // Processar Capital Gains PDF
+            if (brokerFiles.capitalGains) {
+              const { rows92A, rows92B } = await parser.parse(brokerFiles.capitalGains);
+              totalRows92A += rows92A.length;
+              totalRows92B += rows92B.length;
+              if (rows92A.length > 0) {
+                this.addMaisValiasData(rows92A);
+              }
+              if (rows92B.length > 0) {
+                this.addOutrosIncrementosData(rows92B);
+              }
             }
-
-            // Adicionar ao Anexo J - 9.2B
-            if (rows92B.length > 0) {
-              this.addOutrosIncrementosData(rows92B);
+            // Processar Investment Income PDF
+            if (brokerFiles.investmentIncome) {
+              const { rows8A } = await parser.parse(brokerFiles.investmentIncome);
+              totalRows8A += rows8A.length;
+              if (rows8A.length > 0) {
+                this.addRendimentosJurosData(rows8A);
+              }
             }
+            break;
           }
+          case "trading212": {
+            const parser = new Trading212Parser();
+            if (brokerFiles.annualStatement) {
+              const { rows92A, rows8A } = await parser.parse(brokerFiles.annualStatement);
+              totalRows92A += rows92A.length;
+              totalRows8A += rows8A.length;
+              if (rows92A.length > 0) {
+                this.addMaisValiasData(rows92A);
+              }
+              if (rows8A.length > 0) {
+                this.addRendimentosJurosData(rows8A);
+              }
+            }
+            break;
+          }
+        }
 
-          // Processar Investment Income PDF (dividendos/juros)
-          if (brokerFiles.investmentIncome) {
-            console.log("Processando Investment Income PDF...");
-            const { rows8A } = await this.pdfParser.parseInvestmentIncome(
-              brokerFiles.investmentIncome,
-            );
+        // Forçar atualização da UI
+        if (this.homeView && this.homeView.currentAnexoComponent) {
+          // Recarregar as tabelas se estivermos no Anexo J
+          if (this.homeView.currentTab === "anexoJ") {
+            const anexoJ = this.homeView.currentAnexoComponent;
 
-            console.log(`Encontradas ${rows8A.length} linhas para a tabela 8A`);
+            // Atualizar tabela 9.2A
+            if (
+              anexoJ.tables &&
+              anexoJ.tables.maisValiasJ &&
+              this.data.anexoJ?.rendimentosCategoriaG
+            ) {
+              anexoJ.tables.maisValiasJ.setData(
+                this.data.anexoJ.rendimentosCategoriaG,
+              );
+              console.log(
+                "Tabela 9.2A atualizada com",
+                this.data.anexoJ.rendimentosCategoriaG.length,
+                "linhas",
+              );
+            }
 
-            totalRows8A = rows8A.length;
+            // Atualizar tabela 9.2B
+            if (
+              anexoJ.tables &&
+              anexoJ.tables.maisValiasJB &&
+              this.data.anexoJ?.rendimentosCategoriaG_B
+            ) {
+              anexoJ.tables.maisValiasJB.setData(
+                this.data.anexoJ.rendimentosCategoriaG_B,
+              );
+              console.log(
+                "Tabela 9.2B atualizada com",
+                this.data.anexoJ.rendimentosCategoriaG_B.length,
+                "linhas",
+              );
+            }
 
-            if (rows8A.length > 0) {
-              this.addRendimentosJurosData(rows8A);
+            // Atualizar tabela 8A
+            if (
+              anexoJ.tables &&
+              anexoJ.tables.rendimentosJuros &&
+              this.data.anexoJ?.rendimentosCategoriaE
+            ) {
+              anexoJ.tables.rendimentosJuros.setData(
+                this.data.anexoJ.rendimentosCategoriaE,
+              );
+              console.log(
+                "Tabela 8A atualizada com",
+                this.data.anexoJ.rendimentosCategoriaE.length,
+                "linhas",
+              );
             }
           }
         }
       }
-
-      // Forçar atualização da UI
-      if (this.homeView && this.homeView.currentAnexoComponent) {
-        // Recarregar as tabelas se estivermos no Anexo J
-        if (this.homeView.currentTab === "anexoJ") {
-          const anexoJ = this.homeView.currentAnexoComponent;
-
-          // Atualizar tabela 9.2A
-          if (
-            anexoJ.tables &&
-            anexoJ.tables.maisValiasJ &&
-            this.data.anexoJ?.rendimentosCategoriaG
-          ) {
-            anexoJ.tables.maisValiasJ.setData(
-              this.data.anexoJ.rendimentosCategoriaG,
-            );
-            console.log(
-              "Tabela 9.2A atualizada com",
-              this.data.anexoJ.rendimentosCategoriaG.length,
-              "linhas",
-            );
-          }
-
-          // Atualizar tabela 9.2B
-          if (
-            anexoJ.tables &&
-            anexoJ.tables.maisValiasJB &&
-            this.data.anexoJ?.rendimentosCategoriaG_B
-          ) {
-            anexoJ.tables.maisValiasJB.setData(
-              this.data.anexoJ.rendimentosCategoriaG_B,
-            );
-            console.log(
-              "Tabela 9.2B atualizada com",
-              this.data.anexoJ.rendimentosCategoriaG_B.length,
-              "linhas",
-            );
-          }
-
-          // Atualizar tabela 8A
-          if (
-            anexoJ.tables &&
-            anexoJ.tables.rendimentosJuros &&
-            this.data.anexoJ?.rendimentosCategoriaE
-          ) {
-            anexoJ.tables.rendimentosJuros.setData(
-              this.data.anexoJ.rendimentosCategoriaE,
-            );
-            console.log(
-              "Tabela 8A atualizada com",
-              this.data.anexoJ.rendimentosCategoriaE.length,
-              "linhas",
-            );
-          }
-        }
-      }
-
       this.showSuccess(
         `Dados importados com sucesso! (${totalRows92A + totalRows92B + totalRows8A} linhas)`,
       );

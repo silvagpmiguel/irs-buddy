@@ -14,9 +14,9 @@ export class BrokerSection {
       {
         id: "xtb",
         name: "XTB",
-        icon: "📈",
+        icon: "",
         description: "Plataforma de investimento internacional",
-        instructions: this.getBrokerInstructions(),
+        instructions: this.getXTBInstructions(),
         requiredFiles: [
           {
             type: "capitalGains",
@@ -32,10 +32,25 @@ export class BrokerSection {
           },
         ],
       },
+      {
+        id: "trading212",
+        name: "Trading 212",
+        icon: "",
+        description: "Plataforma de investimento mobile",
+        instructions: this.getTrading212Instructions(),
+        requiredFiles: [
+          {
+            type: "annualStatement",
+            label: "Annual Statement",
+            icon: "📅",
+            description: "Extrato anual da Trading212 (PDF)",
+          },
+        ],
+      },
     ];
   }
 
-  getBrokerInstructions() {
+  getXTBInstructions() {
     return `
       <div class="broker-instructions">
         <div class="instructions-steps">
@@ -70,6 +85,48 @@ export class BrokerSection {
             <div class="step-content">
               <strong>Descarregue os documentos fiscais</strong>
               <span class="step-detail">Capital Gains e Dividends & Interests para o ano em questão</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  getTrading212Instructions() {
+    return `
+      <div class="broker-instructions">
+        <div class="instructions-steps">
+          <div class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <a href="https://www.trading212.com/" target="_blank" rel="noopener noreferrer" class="step-link">
+                <strong>Aceda à Trading212</strong>
+              </a>
+              <span class="step-detail">Faça login na sua conta</span>
+            </div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <strong>Dirija-se a "Documentos"</strong>
+              <span class="step-detail">No menu principal da plataforma</span>
+            </div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <strong>Selecione "Extratos"</strong>
+              <span class="step-detail">Escolha o ano pretendido</span>
+            </div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step-item">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <strong>Descarregue o "Annual Statement"</strong>
+              <span class="step-detail">Faça o download do PDF</span>
             </div>
           </div>
         </div>
