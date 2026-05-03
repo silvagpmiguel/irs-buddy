@@ -305,6 +305,32 @@
   animation: spin 1s linear infinite;
 }
 
+.broker-section .warning-box {
+  margin: 1rem 0;
+  padding: 0.5rem;
+  background: #fef3e8;
+  border-left: 2px solid #f4a261;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.broker-section .warning-icon {
+  font-size: 1.2rem;
+}
+
+.broker-section .warning-content {
+  flex: 1;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #8b5e2c;
+}
+
+.broker-section .warning-content strong {
+  font-weight: 700;
+}
+
 /* Estado de processamento */
 .broker-section .processing {
   pointer-events: none;

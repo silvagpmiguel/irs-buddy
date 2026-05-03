@@ -1,0 +1,137 @@
+.errors-list-container {
+  background: #fef3e8;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(244, 162, 97, 0.3);
+}
+
+.errors-list-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: #fff3e0;
+  border-bottom: 1px solid rgba(244, 162, 97, 0.3);
+}
+
+.errors-list-icon {
+  font-size: 1.2rem;
+}
+
+.errors-list-title {
+  margin: 0;
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #f4a261;
+}
+
+.errors-list-count {
+  background: #f4a261;
+  color: white;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.errors-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.error-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(244, 162, 97, 0.2);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.error-item:hover {
+  background: rgba(244, 162, 97, 0.1);
+}
+
+.error-item:last-child {
+  border-bottom: none;
+}
+
+.error-item-content {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.error-item-row {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+  background: #e8f4f0;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+}
+
+.error-item-field {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.error-item-message {
+  font-size: 0.7rem;
+  color: var(--text-gray);
+}
+
+.error-item-focus-btn {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  color: var(--text-gray);
+}
+
+.error-item-focus-btn:hover {
+  background: rgba(15, 59, 44, 0.1);
+  color: var(--primary-color);
+  transform: scale(1.1);
+}
+
+/* Scrollbar */
+.errors-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.errors-list::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.errors-list::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 10px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .error-item-content {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .error-item {
+    align-items: flex-start;
+  }
+
+  .error-item-focus-btn {
+    margin-left: 0.5rem;
+  }
+}

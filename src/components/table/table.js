@@ -215,12 +215,147 @@ export class DynamicTable {
     }
   }
 
+  // ========== VALIDAÇÃO ==========
+  isCellInvalid(header, value, rowIdx) {
+    if (header.validation && typeof header.validation === "function") {
+      return !header.validation(value, rowIdx, this.data);
+    }
+    return false;
+  }
+
+  isRowInvalid(row, rowIdx, headers = this.headers) {
+    for (const header of headers) {
+      if (
+        header.subHeaders &&
+        this.isRowInvalid(row, rowIdx, header.subHeaders)
+      ) {
+        return true;
+      } else if (
+        !header.subHeaders &&
+        this.isCellInvalid(header, row[header.field], rowIdx)
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  validateAll() {
+    const errors = [];
+
+    console.log(`[DynamicTable] Validating ${this.data.length} rows`);
+
+    for (let rowIdx = 0; rowIdx < this.data.length; rowIdx++) {
+      const row = this.data[rowIdx];
+      console.log(`[DynamicTable] Row ${rowIdx}:`, row);
+
+      // Percorrer headers de forma recursiva
+      const validateHeaders = (headers, prefix = "") => {
+        for (const header of headers) {
+          if (header.subHeaders) {
+            validateHeaders(header.subHeaders, `${prefix}${header.label} > `);
+          } else {
+            const value = row[header.field];
+            const isInvalid = this.isCellInvalid(header, value, rowIdx);
+
+            if (isInvalid) {
+              console.log(
+                `[DynamicTable] Invalid cell: ${header.field}=${value}, validationMessage=${header.validationMessage}`,
+              );
+              errors.push({
+                row: rowIdx + 1,
+                field: header.label,
+                fieldKey: header.field,
+                message: header.validationMessage || `Campo inválido`,
+                rowId: rowIdx,
+              });
+            }
+          }
+        }
+      };
+
+      validateHeaders(this.headers);
+    }
+
+    console.log(`[DynamicTable] Total errors: ${errors.length}`);
+    return errors;
+  }
+
+  scrollToInvalidCell(rowId, fieldKey) {
+    let targetRow = null;
+    let targetRowIdx = null;
+
+    // Se rowId é número, pode ser índice ou ID
+    if (typeof rowId === "number") {
+      // Tentar encontrar pelo índice
+      targetRow = this.rowElements.get(rowId);
+      if (targetRow) {
+        targetRowIdx = rowId;
+      } else {
+        // Procurar pelo data-row-idx
+        for (const [id, element] of this.rowElements.entries()) {
+          if (
+            element &&
+            parseInt(element.getAttribute("data-row-idx")) === rowId
+          ) {
+            targetRow = element;
+            targetRowIdx = id;
+            break;
+          }
+        }
+      }
+    } else {
+      // rowId é string (o ID gerado)
+      targetRow = this.rowElements.get(rowId);
+      if (targetRow) {
+        targetRowIdx = parseInt(targetRow.getAttribute("data-row-idx"));
+      }
+    }
+
+    if (!targetRow) {
+      console.warn(`Linha não encontrada para o rowId: ${rowId}`);
+      return;
+    }
+
+    // Scroll para a linha
+    targetRow.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    // Encontrar a célula específica
+    const cell = targetRow.querySelector(`[data-field="${fieldKey}"]`);
+    if (cell) {
+      cell.focus();
+      cell.classList.add("highlight-invalid");
+
+      // Se for um input, selecionar o texto
+      if (cell.tagName === "INPUT" || cell.tagName === "SELECT") {
+        cell.focus();
+        if (cell.select) cell.select();
+      }
+
+      setTimeout(() => {
+        cell.classList.remove("highlight-invalid");
+      }, 2000);
+    } else {
+      // Se não encontrar a célula específica, apenas destacar a linha
+      targetRow.classList.add("highlight-row-invalid");
+      setTimeout(() => {
+        targetRow.classList.remove("highlight-row-invalid");
+      }, 2000);
+    }
+  }
   // ========== CRIAÇÃO DE ELEMENTOS DOM ==========
+
   createRowElement(row, idx, rowId) {
     const tr = document.createElement("tr");
     tr.className = "at-table-row";
     tr.setAttribute("data-row-idx", idx);
     tr.setAttribute("data-row-id", rowId);
+
+    // Adicionar classe se a linha for inválida
+    if (this.isRowInvalid(row, idx)) {
+      tr.classList.add("invalid-row");
+    }
+
     tr.appendChild(this.createCellsFragment(row, idx, rowId));
     tr.appendChild(this.createActionCell(idx, rowId));
     return tr;
@@ -255,42 +390,59 @@ export class DynamicTable {
 
   getCellHtml(header, value, idx, rowId) {
     const { field, type, options = {}, formatter, float } = header;
-    const catalog = this.catalogs[field];
+
+    // Tratar valores null e undefined como string vazia (sem lógica customizada por field)
+    let displayValue = value;
+    if (value === null || value === undefined) {
+      displayValue = "";
+    }
+
+    const isInvalid = this.isCellInvalid(header, displayValue, idx);
+    const invalidClass = isInvalid ? "invalid-cell" : "";
+    const invalidTitle =
+      isInvalid && header.validationMessage
+        ? `title="${header.validationMessage}"`
+        : "";
 
     if (formatter) {
-      return `<span class="at-table-static">${formatter(value, idx, this.data[idx])}</span>`;
+      return `<span class="at-table-static ${invalidClass}" ${invalidTitle}>${formatter(displayValue, idx, this.data[idx])}</span>`;
     }
     if (type === "auto-number") {
       const start = options.start || 1;
-      return `<span class="at-table-static">${start + idx}</span>`;
+      return `<span class="at-table-static ${invalidClass}" ${invalidTitle}>${start + idx}</span>`;
     }
     if (type === "static-text") {
-      return `<span class="at-table-static">${value}</span>`;
+      return `<span class="at-table-static ${invalidClass}" ${invalidTitle}>${displayValue}</span>`;
     }
     if (type === "select") {
       const selectOptions = options || [];
-      let selectHtml = `<select class="at-table-select" data-field="${field}" data-row="${idx}" data-row-id="${rowId}">`;
+      let selectHtml = `<select class="at-table-select ${invalidClass}" data-field="${field}" data-row="${idx}" data-row-id="${rowId}" ${invalidTitle}>`;
       for (const opt of selectOptions) {
-        const selected = opt.value === value ? "selected" : "";
+        const selected = opt.value === displayValue ? "selected" : "";
         selectHtml += `<option value="${opt.value}" ${selected}>${opt.label}</option>`;
       }
       selectHtml += `</select>`;
       return selectHtml;
     }
     if (type === "checkbox") {
-      const checked = value === "S";
-      return `<input type="checkbox" class="at-table-checkbox" data-field="${field}" data-row="${idx}" data-row-id="${rowId}" ${checked ? "checked" : ""}>`;
+      const checked = displayValue === "S";
+      return `<input type="checkbox" class="at-table-checkbox ${invalidClass}" data-field="${field}" data-row="${idx}" data-row-id="${rowId}" ${checked ? "checked" : ""} ${invalidTitle}>`;
     }
     if (type === "number") {
       const step = float ? "any" : "1";
       const spinnerClass = float ? "no-spinner" : "";
       const min = options.min !== undefined ? `min="${options.min}"` : "";
       const max = options.max !== undefined ? `max="${options.max}"` : "";
-      const displayValue =
-        value !== undefined && value !== null && value !== "" ? value : 0;
-      return `<input type="number" class="at-table-input ${spinnerClass}" value="${displayValue}" step="${step}" ${min} ${max} data-field="${field}" data-row="${idx}" data-row-id="${rowId}">`;
+      // Se displayValue for vazio, não mostrar 0
+      const numberValue =
+        displayValue !== "" &&
+        displayValue !== null &&
+        displayValue !== undefined
+          ? displayValue
+          : "";
+      return `<input type="number" class="at-table-input ${spinnerClass} ${invalidClass}" value="${numberValue}" step="${step}" ${min} ${max} data-field="${field}" data-row="${idx}" data-row-id="${rowId}" ${invalidTitle} placeholder="${options.placeholder || ""}">`;
     }
-    return `<input type="text" class="at-table-input" value="${value}" data-field="${field}" data-row="${idx}" data-row-id="${rowId}">`;
+    return `<input type="text" class="at-table-input ${invalidClass}" value="${displayValue}" data-field="${field}" data-row="${idx}" data-row-id="${rowId}" ${invalidTitle}>`;
   }
 
   createActionCell(idx, rowId) {
@@ -574,18 +726,29 @@ export class DynamicTable {
     const newRow = {};
     const addFields = (headers) => {
       for (const h of headers) {
-        if (h.subHeaders) addFields(h.subHeaders);
-        else if (h.field) {
-          let defaultValue = "";
+        if (h.subHeaders) {
+          addFields(h.subHeaders);
+        } else if (h.field) {
+          let defaultValue;
           if (h.defaultValue !== undefined) {
             defaultValue =
               typeof h.defaultValue === "function"
                 ? h.defaultValue()
                 : h.defaultValue;
           } else if (h.type === "number") {
-            defaultValue = 0;
+            // Para números, usar 0 como default (mas para campos que devem ser preenchidos, usar null)
+            if (
+              h.field === "DespesasEncargos" ||
+              h.field === "ImpostoPagoNoEstrangeiro"
+            ) {
+              defaultValue = 0;
+            } else {
+              defaultValue = null;
+            }
           } else if (h.type === "checkbox") {
             defaultValue = "N";
+          } else {
+            defaultValue = null;
           }
           newRow[h.field] = defaultValue;
         }

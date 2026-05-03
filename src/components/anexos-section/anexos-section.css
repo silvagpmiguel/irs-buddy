@@ -3,7 +3,9 @@
   border-radius: 32px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   margin-top: 4rem;
 }
 
@@ -33,7 +35,11 @@
 .anexos-section .card-title {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+  background: linear-gradient(
+    135deg,
+    var(--primary-dark),
+    var(--primary-color)
+  );
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -77,7 +83,7 @@
 }
 
 .anexos-section .tab-btn.active::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
@@ -105,7 +111,11 @@
 .anexos-section #reviewChangesBtn {
   min-width: 200px;
   transition: all 0.3s ease;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--primary-light)
+  );
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -132,6 +142,23 @@
   color: #dc3545;
 }
 
+.anexo-wrapper {
+  transition: opacity 0.2s ease;
+}
+
+.anexo-wrapper[style*="display: block"] {
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
   .anexos-section .card-header {
@@ -139,32 +166,32 @@
     text-align: center;
     padding: 1rem;
   }
-  
+
   .anexos-section .card-title {
     font-size: 1.25rem;
   }
-  
+
   .anexos-section .tabs-container {
     flex-wrap: wrap;
     padding: 0.5rem 1rem 0 1rem;
   }
-  
+
   .anexos-section .tab-btn {
     flex: 1;
     text-align: center;
     padding: 0.5rem;
     font-size: 0.8rem;
   }
-  
+
   .anexos-section .anexos-container {
     padding: 1rem;
   }
-  
+
   .anexos-section .action-buttons {
     justify-content: stretch;
     padding: 1rem;
   }
-  
+
   .anexos-section #reviewChangesBtn {
     width: 100%;
   }

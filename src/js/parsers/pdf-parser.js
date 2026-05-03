@@ -4,6 +4,55 @@ export class PDFParser {
   constructor() {
     this.pdfjsLib = window.pdfjsLib;
     this.countryCatalog = CatalogoPaisesEN;
+    this.countryCode2Digit = {
+      IE: "372", // Irlanda
+      US: "840", // Estados Unidos
+      GB: "826", // Reino Unido
+      DE: "276", // Alemanha
+      FR: "250", // França
+      NL: "528", // Países Baixos
+      LU: "442", // Luxemburgo
+      JE: "832", // Jersey
+      CA: "124", // Canadá
+      AU: "36", // Austrália
+      JP: "392", // Japão
+      CH: "756", // Suíça
+      ES: "724", // Espanha
+      IT: "380", // Itália
+      PT: "620", // Portugal
+      BE: "56", // Bélgica
+      DK: "208", // Dinamarca
+      FI: "246", // Finlândia
+      NO: "578", // Noruega
+      SE: "752", // Suécia
+      AT: "40", // Áustria
+      GR: "300", // Grécia
+      PL: "616", // Polónia
+      CZ: "203", // República Checa
+      HU: "348", // Hungria
+      RO: "642", // Roménia
+      BG: "100", // Bulgária
+      HR: "191", // Croácia
+      SK: "703", // Eslováquia
+      SI: "705", // Eslovénia
+      EE: "233", // Estónia
+      LV: "428", // Letónia
+      LT: "440", // Lituânia
+      MT: "470", // Malta
+      CY: "196", // Chipre
+      AE: "784", // Emirados Árabes Unidos
+      SA: "682", // Arábia Saudita
+      QA: "634", // Catar
+      SG: "702", // Singapura
+      HK: "344", // Hong Kong
+      CN: "156", // China
+      IN: "356", // Índia
+      BR: "76", // Brasil
+      ZA: "710", // África do Sul
+      RU: "643", // Rússia
+      TR: "792", // Turquia
+      IL: "376", // Israel
+    };
     this.countryMap = this.buildCountryMap();
   }
 
@@ -102,6 +151,20 @@ export class PDFParser {
 
     throw new Error(
       `Código do país não encontrado para: "${countryName}" (simplificado: "${simplifiedName}")`,
+    );
+  }
+
+  getCountryCodeFromISIN(isin) {
+    if (!isin || isin.length < 2) {
+      throw new Error(`ISIN deve conter pelo menos 2 caracteres: ${isin}.`);
+    }
+    const countryCode = isin.substring(0, 2).toUpperCase();
+    const mappedCode = this.countryCode2Digit[countryCode];
+    if (mappedCode) {
+      return mappedCode;
+    }
+    throw new Error(
+      `Código do país não encontrado para o isin: "${isin}".)`,
     );
   }
 

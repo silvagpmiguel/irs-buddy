@@ -1,14 +1,11 @@
 import { loadTemplate, loadStyles } from "../../js/template-loader.js";
 import { DynamicTable } from "../table/table.js";
 import { CatalogoPaises } from "../../js/constants/catalogs.js";
+import { BaseAnexo } from '../../js/anexo.js';
 
-export class AnexoG {
+export class AnexoG extends BaseAnexo{
   constructor(data, onDataChange) {
-    this.data = data || {};
-    this.onDataChange = onDataChange;
-    this.tables = {};
-    this.element = null;
-    this.isInitialized = false;
+    super(data, onDataChange);
   }
 
   async render() {
@@ -18,11 +15,8 @@ export class AnexoG {
     container.className = "anexo-g";
     container.innerHTML = template;
     this.element = container;
-    setTimeout(() => {
-      this.applyData();
-      this.initTable();
-      this.attachEvents();
-    });
+    this.applyData();
+    this.attachEvents();
     return this.element;
   }
 
@@ -49,16 +43,17 @@ export class AnexoG {
     if (radioNao && englobamento === "N") radioNao.checked = true;
   }
 
-  initTable() {
+  initTables() {
     const container = document.getElementById("anexoGTableContainer");
 
     if (!container) {
-      console.error("Container anexoGTableContainer não encontrado!");
+      console.error("[AnexoG] Container anexoGTableContainer não encontrado!");
       return;
     }
 
     const anexoG = this.data?.anexoG || {};
     const rows = anexoG.quadro09 || [];
+    console.log("[AnexoG] initTables - rows a processar:", rows.length);
 
     try {
       this.tables.anexoG = new DynamicTable("anexoGTableContainer", {
@@ -258,6 +253,7 @@ export class AnexoG {
           if (this.onDataChange) this.onDataChange(this.data);
         },
       });
+      console.log("[AnexoG] Tabela criada com sucesso");
     } catch (error) {
       console.error("Erro ao criar tabela:", error);
     }

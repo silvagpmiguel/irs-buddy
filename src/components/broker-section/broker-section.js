@@ -38,6 +38,14 @@ export class BrokerSection {
         icon: "",
         description: "Plataforma de investimento mobile",
         instructions: this.getTrading212Instructions(),
+        warning: `
+    <div class="warning-box">
+      <div class="warning-icon">⚠️</div>
+      <div class="warning-content">
+        <strong>Atenção:</strong> A Trading212 não fornece as datas de aquisição no report anual. Por favor, verifique e corrija as datas no <strong>Passo 3 - Anexo J</strong> antes de exportar.
+      </div>
+    </div>
+  `,
         requiredFiles: [
           {
             type: "annualStatement",
@@ -226,10 +234,11 @@ export class BrokerSection {
     section.id = `${brokerId}-upload-section`;
     section.className = "broker-upload-section";
     section.innerHTML = `
-      <h3>${broker.name} - Faça upload dos PDFs</h3>
-      ${broker.instructions}
-      <div class="upload-grid" id="${brokerId}-upload-grid"></div>
-    `;
+    <h3>${broker.name} - Faça upload dos PDFs</h3>
+    ${broker.instructions}
+    ${broker.warning || ""}
+    <div class="upload-grid" id="${brokerId}-upload-grid"></div>
+  `;
     sectionsContainer.appendChild(section);
     this.initUploadSection(brokerId);
   }

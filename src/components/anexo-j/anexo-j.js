@@ -6,13 +6,12 @@ import {
   CatalogoCodigosRendimentoJ9A,
   CatalogoCodigosRendimentoJ9B,
 } from "../../js/constants/catalogs.js";
+import { getCurrentYear } from "../../js/date.js";
+import { BaseAnexo } from "../../js/anexo.js";
 
-export class AnexoJ {
+export class AnexoJ extends BaseAnexo {
   constructor(data, onDataChange) {
-    this.data = data;
-    this.onDataChange = onDataChange;
-    this.tables = {};
-    this.element = null;
+    super(data, onDataChange);
   }
 
   async render() {
@@ -22,11 +21,8 @@ export class AnexoJ {
     container.className = "anexo-j";
     container.innerHTML = template;
     this.element = container;
-    setTimeout(() => {
-      this.applyData();
-      this.initTables();
-      this.attachEvents();
-    });
+    this.applyData();
+    this.attachEvents();
     return this.element;
   }
 
@@ -238,28 +234,34 @@ export class AnexoJ {
   }
 
   initMaisValiasJTable() {
-    const container = this.element.querySelector("#maisValiasJContainer");
-    if (!container) return;
+    const container = this.element?.querySelector("#maisValiasJContainer");
+    if (!container) {
+      console.warn("[AnexoJ] Container não encontrado, adiando inicialização");
+      return;
+    }
+    if (this.tables.maisValiasJ) return;
 
     const anexoJ = this.data.anexoJ || {};
     const maisValias = anexoJ.rendimentosCategoriaG || [];
+    const currentYear = getCurrentYear();
+    const minYear = 1990;
 
     this.tables.maisValiasJ = new DynamicTable("maisValiasJContainer", {
       data: maisValias.map((mv, idx) => ({
         NLinha: mv.NLinha || 951 + idx,
-        CodPais: mv.CodPais || "",
-        Codigo: mv.Codigo || "",
-        AnoRealizacao: mv.AnoRealizacao || "",
-        MesRealizacao: mv.MesRealizacao || "",
-        DiaRealizacao: mv.DiaRealizacao || "",
-        ValorRealizacao: mv.ValorRealizacao || "",
-        AnoAquisicao: mv.AnoAquisicao || "",
-        MesAquisicao: mv.MesAquisicao || "",
-        DiaAquisicao: mv.DiaAquisicao || "",
-        ValorAquisicao: mv.ValorAquisicao || "",
-        DespesasEncargos: mv.DespesasEncargos || "",
-        ImpostoPagoNoEstrangeiro: mv.ImpostoPagoNoEstrangeiro || "",
-        CodPaisContraparte: mv.CodPaisContraparte || "",
+        CodPais: mv.CodPais || null,
+        Codigo: mv.Codigo || null,
+        AnoRealizacao: mv.AnoRealizacao || null,
+        MesRealizacao: mv.MesRealizacao || null,
+        DiaRealizacao: mv.DiaRealizacao || null,
+        ValorRealizacao: mv.ValorRealizacao || null,
+        AnoAquisicao: mv.AnoAquisicao || null,
+        MesAquisicao: mv.MesAquisicao || null,
+        DiaAquisicao: mv.DiaAquisicao || null,
+        ValorAquisicao: mv.ValorAquisicao || null,
+        DespesasEncargos: mv.DespesasEncargos || 0,
+        ImpostoPagoNoEstrangeiro: mv.ImpostoPagoNoEstrangeiro || 0,
+        CodPaisContraparte: mv.CodPaisContraparte || null,
         RespeitaValoresMobiliarios: mv.RespeitaValoresMobiliarios || "N",
       })),
       headers: [
@@ -293,32 +295,39 @@ export class AnexoJ {
               label: "Ano",
               field: "AnoRealizacao",
               type: "number",
-              defaultValue: () => new Date().getFullYear(),
-              options: { min: 1900, max: 2099 },
+              options: { min: minYear, max: currentYear, placeholder: "YYYY" },
               class: "col-data",
+              validation: (value) =>
+                value &&
+                value.toString().length === 4 &&
+                value >= minYear &&
+                value <= currentYear,
+              validationMessage: `Ano inválido (deve ser entre ${minYear} e ${currentYear})`,
             },
             {
               label: "Mês",
               field: "MesRealizacao",
               type: "number",
-              defaultValue: () => new Date().getMonth() + 1,
-              options: { min: 1, max: 12 },
+              options: { min: 1, max: 12, placeholder: "MM" },
               class: "col-data",
+              validation: (value) => value && value >= 1 && value <= 12,
+              validationMessage: "Mês inválido (deve ser entre 1 e 12)",
             },
             {
               label: "Dia",
               field: "DiaRealizacao",
               type: "number",
-              defaultValue: () => new Date().getDate(),
-              options: { min: 1, max: 31 },
+              options: { min: 1, max: 31, placeholder: "DD" },
               class: "col-data",
+              validation: (value) => value && value >= 1 && value <= 31,
+              validationMessage: "Dia inválido (deve ser entre 1 e 31)",
             },
             {
               label: "Valor (€)",
               field: "ValorRealizacao",
               type: "number",
+              validation: (value) => value != null && value > 0,
               float: true,
-              defaultValue: 0,
               class: "col-valor",
             },
           ],
@@ -332,32 +341,39 @@ export class AnexoJ {
               label: "Ano",
               field: "AnoAquisicao",
               type: "number",
-              defaultValue: () => new Date().getFullYear(),
-              options: { min: 1900, max: 2099 },
+              options: { min: minYear, max: currentYear, placeholder: "YYYY" },
               class: "col-data",
+              validation: (value) =>
+                value &&
+                value.toString().length === 4 &&
+                value >= minYear &&
+                value <= currentYear,
+              validationMessage: `Ano inválido (deve ser entre ${minYear} e ${currentYear})`,
             },
             {
               label: "Mês",
               field: "MesAquisicao",
               type: "number",
-              defaultValue: () => new Date().getMonth() + 1,
-              options: { min: 1, max: 12 },
+              options: { min: 1, max: 12, placeholder: "MM" },
               class: "col-data",
+              validation: (value) => value && value >= 1 && value <= 12,
+              validationMessage: "Mês inválido (deve ser entre 1 e 12)",
             },
             {
               label: "Dia",
               field: "DiaAquisicao",
               type: "number",
-              defaultValue: () => new Date().getDate(),
-              options: { min: 1, max: 31 },
+              options: { min: 1, max: 31, placeholder: "DD" },
               class: "col-data",
+              validation: (value) => value && value >= 1 && value <= 31,
+              validationMessage: "Dia inválido (deve ser entre 1 e 31)",
             },
             {
               label: "Valor (€)",
               field: "ValorAquisicao",
               type: "number",
               float: true,
-              defaultValue: 0,
+              validation: (value) => value != null && value > 0,
               class: "col-valor",
             },
           ],
@@ -367,6 +383,7 @@ export class AnexoJ {
           field: "DespesasEncargos",
           type: "number",
           float: true,
+          validation: (value) => value != null && value >= 0,
           defaultValue: 0,
           class: "col-valor",
         },
@@ -375,6 +392,7 @@ export class AnexoJ {
           field: "ImpostoPagoNoEstrangeiro",
           type: "number",
           float: true,
+          validation: (value) => value != null && value >= 0,
           defaultValue: 0,
           class: "col-valor",
         },

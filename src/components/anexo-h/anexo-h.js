@@ -4,13 +4,11 @@ import {
   CatalogoBeneficios,
   CatalogoPaises,
 } from "../../js/constants/catalogs.js";
+import { BaseAnexo } from "../../js/anexo.js";
 
-export class AnexoH {
+export class AnexoH extends BaseAnexo {
   constructor(data, onDataChange) {
-    this.data = data;
-    this.onDataChange = onDataChange;
-    this.tables = {};
-    this.element = null;
+    super(data, onDataChange);
   }
 
   async render() {
@@ -20,11 +18,8 @@ export class AnexoH {
     container.className = "anexo-h";
     container.innerHTML = template;
     this.element = container;
-    setTimeout(() => {
-      this.applyData();
-      this.initTable();
-      this.attachEvents();
-    });
+    this.applyData();
+    this.attachEvents();
     return this.element;
   }
 
@@ -41,7 +36,7 @@ export class AnexoH {
     }
   }
 
-  initTable() {
+  initTables() {
     const container = this.element.querySelector("#beneficiosTableContainer");
     if (!container) return;
 

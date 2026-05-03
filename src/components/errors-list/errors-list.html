@@ -1,0 +1,24 @@
+<div class="errors-list-container">
+  <div class="errors-list-header">
+    <span class="errors-list-icon">⚠️</span>
+    <h4 class="errors-list-title">Erros encontrados</h4>
+    <span class="errors-list-count">${errors.length}</span>
+  </div>
+  <ul class="errors-list">
+    ${errors.map((error, index) => `
+    <li
+      class="error-item"
+      data-error-index="${index}"
+      data-row="${error.row}"
+      data-field="${error.field}"
+    >
+      <div class="error-item-content">
+        <span class="error-item-row">Linha ${error.row}</span>
+        <span class="error-item-field">${error.field}</span>
+        <span class="error-item-message">${error.message}</span>
+      </div>
+      <button class="error-item-focus-btn" title="Ir para este erro">🔍</button>
+    </li>
+    `).join('')}
+  </ul>
+</div>
