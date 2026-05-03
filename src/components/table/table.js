@@ -240,6 +240,25 @@ export class DynamicTable {
     return false;
   }
 
+  updateRowValidation(rowIdx) {
+    // Encontrar a linha atual
+    const tbody = document.getElementById(`${this.containerId}-tbody`);
+    if (!tbody) return;
+
+    const oldRow = tbody.querySelector(`tr[data-row-idx="${rowIdx}"]`);
+    if (!oldRow) return;
+
+    // Criar uma nova linha com os dados atualizados
+    const rowId = oldRow.getAttribute("data-row-id");
+    const newRow = this.createRowElement(this.data[rowIdx], rowIdx, rowId);
+
+    // Substituir a linha antiga pela nova
+    oldRow.replaceWith(newRow);
+
+    // Re-cache dos elementos
+    this.cacheRowElements();
+  }
+
   validateAll() {
     const errors = [];
 
@@ -694,6 +713,10 @@ export class DynamicTable {
         }
         if (!isNaN(rowIdx) && this.data[rowIdx]) {
           this.data[rowIdx][field] = value;
+
+          // Re-renderizar a linha para atualizar os estilos de validação
+          this.updateRowValidation(rowIdx);
+
           this.updateFooter();
           this.onChange(this.data);
         }
@@ -703,6 +726,10 @@ export class DynamicTable {
         const value = target.checked ? "S" : "N";
         if (!isNaN(rowIdx) && this.data[rowIdx]) {
           this.data[rowIdx][field] = value;
+
+          // Re-renderizar a linha para atualizar os estilos de validação
+          this.updateRowValidation(rowIdx);
+
           this.updateFooter();
           this.onChange(this.data);
         }
